@@ -142,11 +142,11 @@ combo = Combobox(miFrame, values=municipios)
 combo.set("Selecciona una opción")  
 combo.place(x=720, y=230)
 
-imagen = tk.PhotoImage(file="imagenmuro.png")
+# imagen = tk.PhotoImage(file="assets/images/design.png")
 
 # Crear un label y agregar la imagen
-label = tk.Label(miFrame, image=imagen, background="white")
-label.place(x=60, y=60)
+# label = tk.Label(miFrame, image=imagen, background="white")
+# label.place(x=60, y=60)
 
 # Función para abrir la segunda ventana
 def abrir_segunda_ventana():

@@ -25,8 +25,8 @@ class DesignParameters(tk.Tk):
         # Lado izquierdo: Imagen
         left_frame = tk.Frame(main_frame)
         left_frame.grid(row=0, column=0, sticky="ns", padx=10)
-        img = Image.open("assets/images/design.png")
-        img = img.resize((200, 400), Image.LANCZOS)
+        img = Image.open("assets/images/Dibujo1-Presentación1.png")
+        img = img.resize((400, 320), Image.LANCZOS)
         img_tk = ImageTk.PhotoImage(img)
         label_img = tk.Label(left_frame, image=img_tk)
         label_img.image = img_tk
