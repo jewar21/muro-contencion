@@ -1,7 +1,10 @@
+import os
 import tkinter as tk
-from tkinter import ttk
+
+from tkinter import ttk, messagebox
 from PIL import Image, ImageTk
 from views.predimensioning import Predimensioning
+from controllers.design_logic import calculate_design_logic
 
 
 class DesignParameters(tk.Tk):
@@ -25,7 +28,8 @@ class DesignParameters(tk.Tk):
         # Lado izquierdo: Imagen
         left_frame = tk.Frame(main_frame)
         left_frame.grid(row=0, column=0, sticky="ns", padx=10)
-        img = Image.open("assets/images/Dibujo1-Presentación1.png")
+        img_path = os.path.join("assets", "images", "Dibujo1-Presentación1.png")
+        img = Image.open(img_path)
         img = img.resize((400, 320), Image.LANCZOS)
         img_tk = ImageTk.PhotoImage(img)
         label_img = tk.Label(left_frame, image=img_tk)
@@ -139,25 +143,43 @@ class DesignParameters(tk.Tk):
     def calculate_aa(self, event):
         location = self.entries["project_location"].get()
         aa_value = {
-            "Ubicación A": "0.1",
-            "Ubicación B": "0.2",
-            "Ubicación C": "0.3",
+            "Ábrego": "0.1",
+            "Arboledas": "0.2",
+            "Bochalema": "0.3",
         }.get(location, "0.0")
         self.entries["aa"].delete(0, tk.END)
         self.entries["aa"].insert(0, aa_value)
 
     def calculate_design(self):
         # Lógica de cálculo usando los valores ingresados
-        data = {key: entry.get() for key, entry in self.entries.items()}
-        print("Datos capturados:", data)
         # Predimensioning(tk.Toplevel(self.root), data)  # Abrir nueva ventana
+        data = {key: entry.get() for key, entry in self.entries.items()}
+        result = calculate_design_logic(data)
+        print("Resultados:", result)
+        
+    #     try:             
+    #         data = {key: entry.get() for key, entry in self.entries.items()}
+    #         required_fields = ["angle_friction", "unit_weight", "steel_resistance", "wall_height"]
+    #         for field in required_fields:
+    #             if not data[field]:
+    #                 raise ValueError(f"El campo '{field}' es obligatorio")
+    #         # Valida que ciertos campos sean numéricos
+    #         numeric_fields = ["angle_friction", "unit_weight", "steel_resistance", "wall_height"]
+    #         for field in numeric_fields:
+    #             if not data[field].replace('.', '', 1).isdigit():
+    #                 raise ValueError(f"El campo '{field}' debe ser un número.")
+                
+    #         print("Datos capturados:", data)
+    #     except ValueError as e:
+    #         messagebox.showinfo('Error de validación', str(e))
 
     def clear_entries(self):
-        for key, entry in self.entries.items():
-            if isinstance(entry, tk.Entry):
-                entry.delete(0, tk.END)
-            elif isinstance(entry, ttk.Combobox):
-                entry.set("")
+        if messagebox.askyesno("Confirmación", "¿Estás seguro de que deseas limpiar los campos?"):
+            for key, entry in self.entries.items():
+                if isinstance(entry, tk.Entry):
+                    entry.delete(0, tk.END)
+                elif isinstance(entry, ttk.Combobox):
+                    entry.set("")
 
 
 if __name__ == "__main__":
