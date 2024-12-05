@@ -13,11 +13,14 @@ def calculate_design_logic(data):
         steel_resistance = float(data["steel_resistance"])
         wall_height = float(data["wall_height"])
 
-        # Aquí va la lógica específica para el diseño
-        # Ejemplo ficticio: Calcular estabilidad
-        stability_factor = (angle_friction + unit_weight) / (steel_resistance * wall_height)
-        # return {"stability_factor": stability_factor}
-        return angle_friction, angle_soil_wall, unit_weight, steel_resistance, wall_height
+        
+        return (
+            angle_friction,
+            angle_soil_wall,
+            unit_weight,
+            steel_resistance,
+            wall_height,
+        )
 
     except ValueError as e:
         return {"error": f"Entrada inválida: {e}"}

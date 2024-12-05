@@ -106,7 +106,7 @@ class DesignParameters(tk.Tk):
                         "Toledo",
                         "Villa Caro",
                         "Villa del Rosario",
-                        "Otro", #En caso de que esto sea la selección, el usuario deberá ingresar el parametro
+                        "Otro",  # En caso de que esto sea la selección, el usuario deberá ingresar el parametro
                     ],
                 )
                 combo.pack(fill="x", pady=5)
@@ -152,12 +152,37 @@ class DesignParameters(tk.Tk):
 
     def calculate_design(self):
         # Lógica de cálculo usando los valores ingresados
-        # Predimensioning(tk.Toplevel(self.root), data)  # Abrir nueva ventana
         data = {key: entry.get() for key, entry in self.entries.items()}
-        result = calculate_design_logic(data)
-        print("Resultados:", result)
-        
-    #     try:             
+
+        # Convertir valores a float según corresponda
+        angle_friction = float(data.get("angle_friction", 0))
+        wall_height = float(data.get("wall_height", 0))
+
+        # Realizar cálculos básicos (los valores dependen de tus fórmulas específicas)
+        base_muro = wall_height * 0.4  # Ejemplo: B = h * 0.4
+        pie = wall_height * 0.15  # Ejemplo: b1 = h * 0.15
+        talon = wall_height * 0.2  # Ejemplo: b3 = h * 0.2
+        base_corona = 0.3  # Ejemplo fijo: b2min = 0.3 m
+        base_abajo = base_muro - pie - talon  # Ejemplo: b2max = B - b1 - b3
+        altura_zapata = wall_height * 0.1  # Ejemplo: d = h * 0.1
+        inclinacion = angle_friction * 0.5  # Ejemplo: β (basado en el ángulo ingresado)
+
+        # Empaqueta los resultados en un diccionario
+        results = {
+            "Base del muro": base_muro,
+            "Pie": pie,
+            "Talón": talon,
+            "Base corona": base_corona,
+            "Base abajo": base_abajo,
+            "Altura de zapata": altura_zapata,
+            "h": wall_height,
+            "Ángulo de inclinación del Vástago": inclinacion,
+        }
+
+        # Llama a la vista Predimensioning para mostrar los resultados
+        Predimensioning(self, results)
+
+    #     try:
     #         data = {key: entry.get() for key, entry in self.entries.items()}
     #         required_fields = ["angle_friction", "unit_weight", "steel_resistance", "wall_height"]
     #         for field in required_fields:
@@ -168,13 +193,15 @@ class DesignParameters(tk.Tk):
     #         for field in numeric_fields:
     #             if not data[field].replace('.', '', 1).isdigit():
     #                 raise ValueError(f"El campo '{field}' debe ser un número.")
-                
+
     #         print("Datos capturados:", data)
     #     except ValueError as e:
     #         messagebox.showinfo('Error de validación', str(e))
 
     def clear_entries(self):
-        if messagebox.askyesno("Confirmación", "¿Estás seguro de que deseas limpiar los campos?"):
+        if messagebox.askyesno(
+            "Confirmación", "¿Estás seguro de que deseas limpiar los campos?"
+        ):
             for key, entry in self.entries.items():
                 if isinstance(entry, tk.Entry):
                     entry.delete(0, tk.END)
