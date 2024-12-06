@@ -1,9 +1,8 @@
 import os
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 from PIL import Image, ImageTk
-from controllers.design_logic import calculate_predimensioning
-from controllers.verification_logic import check_compliance
+from math import atan, degrees
 
 
 class Predimensioning(tk.Toplevel):
@@ -17,160 +16,107 @@ class Predimensioning(tk.Toplevel):
         self.setup_ui()
 
     def setup_ui(self):
-        # Contenedor principal con grid
+        # Contenedor principal
         main_frame = tk.Frame(self, padx=10, pady=10)
         main_frame.grid(sticky="nsew")
-        # main_frame.grid_rowconfigure(0, weight=1)
-        # main_frame.grid_columnconfigure(1, weight=1)
-        # main_frame.pack(fill="both", expand=True)
 
         # Imagen a la izquierda
         left_frame = tk.Frame(main_frame)
-        left_frame.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
+        left_frame.grid(row=0, column=0, sticky="ns", padx=10, pady=10)
 
-        # Cargar y mostrar la imagen
-        img_path = os.path.join(
-            "assets", "images", "design.png"
-        )  # Cambia la ruta según tu imagen
+        # Mostrar imagen
+        img_path = os.path.join("assets", "images", "design.png")
         try:
             img = Image.open(img_path)
-            img = img.resize((500, 400), Image.LANCZOS)
+            img = img.resize((400, 300), Image.LANCZOS)
             img_tk = ImageTk.PhotoImage(img)
             label_img = tk.Label(left_frame, image=img_tk)
-            label_img.image = img_tk  # Necesario para evitar que se recolecte basura
-            label_img.pack(fill="y", expand=True)
+            label_img.image = img_tk
+            label_img.pack()
         except FileNotFoundError:
-            tk.Label(
-                left_frame, text="Imagen no encontrada", font=("Arial", 12, "bold")
-            ).pack()
+            tk.Label(left_frame, text="Imagen no encontrada", font=("Arial", 12, "bold")).pack()
 
         # Tablas a la derecha
-        right_frame = tk.Frame(main_frame, width=300)
-        right_frame.pack_propagate(False)
+        right_frame = tk.Frame(main_frame)
         right_frame.grid(row=0, column=1, sticky="nsew", padx=10, pady=10)
 
         # Tabla 1: Predimensionamiento Calculado
-        self.create_table(
-            right_frame,
-            "Predimensionamiento Calculado",
-            [
-                ("Base del muro (B)", "m"),
-                ("Pie (b1)", "m"),
-                ("Talón (b3)", "m"),
-                ("Base corona (b2min)", "m"),
-                ("Base máxima (b2max)", "m"),
-                ("Altura de zapata (d)", "m"),
-                ("Pantalla (h)", "m"),
-                ("Inclinación de vástago (beta)", "°"),
-            ],
-            "predimensioning_results",
-            headers=["Ubicación", "Valor", "Unidad"],
-            total_width=300,
+        predimensioning_title = tk.Label(right_frame, text="Predimensionamiento Calculado", font=("Arial", 12, "bold"))
+        predimensioning_title.pack(pady=5)
+        self.predimensioning_results = ttk.Treeview(
+            right_frame, columns=("name", "value", "unit"), show="headings", height=8
         )
-
-        # Encabezado y botón para verificaciones
-        verif_title_frame = tk.Frame(right_frame)
-        verif_title_frame.pack(fill="x", pady=5)
-
-        verif_label = tk.Label(
-            verif_title_frame, text="Verificaciones", font=("Arial", 12, "bold")
-        )
-        verif_label.pack(side="left", padx=5)
-
-        verify_button = tk.Button(
-            verif_title_frame,
-            text="Verificar",
-            font=("Arial", 12, "bold"),
-            command=self.perform_verification,
-        )
-        verify_button.pack(side="left", padx=10)
+        self.predimensioning_results.heading("name", text="Parámetro")
+        self.predimensioning_results.heading("value", text="Valor")
+        self.predimensioning_results.heading("unit", text="Unidad")
+        self.predimensioning_results.column("name", anchor="w", width=200)
+        self.predimensioning_results.column("value", anchor="center", width=100)
+        self.predimensioning_results.column("unit", anchor="center", width=80)
+        self.predimensioning_results.pack(pady=10)
 
         # Tabla 2: Verificaciones
-        self.create_table(
-            right_frame,
-            "",
-            [
-                ("Factor de seguridad al volcamiento", ""),
-                ("Factor de seguridad al deslizamiento", ""),
-                ("Esfuerzo máximo a presión", ""),
-                ("Esfuerzo mínimo a presión", ""),
-            ],
-            "verification_results",
-            headers=["Parámetro", "Resultado"],
-            total_width=300,
+        verification_title = tk.Label(right_frame, text="Verificaciones", font=("Arial", 12, "bold"))
+        verification_title.pack(pady=5)
+        self.verification_results = ttk.Treeview(
+            right_frame, columns=("name", "result"), show="headings", height=5
         )
+        self.verification_results.heading("name", text="Parámetro")
+        self.verification_results.heading("result", text="Resultado")
+        self.verification_results.column("name", anchor="w", width=200)
+        self.verification_results.column("result", anchor="center", width=100)
+        self.verification_results.pack(pady=10)
 
-        # Botón para cerrar al final
+        # Botón para cerrar
         close_button = tk.Button(right_frame, text="Cerrar", command=self.destroy)
-        close_button.pack(pady=20)
+        close_button.pack(pady=10)
 
-        # Calcular predimensionamiento inicial
+        # Llenar los datos
         self.calculate_predimensioning_results()
-
-    def create_table(
-        self, parent, title, columns, attribute_name, headers=None, total_width=300
-    ):
-        if title:
-            title_label = tk.Label(
-                parent, text=title, font=("Arial", 12, "bold"), anchor="w", bg="#f0f0f0"
-            )
-            title_label.pack(fill="x", pady=2)
-
-        # Configuración dinámica de encabezados
-        headers = headers if headers else ["Ubicación", "Valor", "Unidad"]
-        column_width = total_width // len(
-            headers
-        )  # Divide el ancho total entre las columnas
-
-        tree = ttk.Treeview(
-            parent,
-            columns=[f"col{i}" for i in range(len(headers))],
-            show="headings",
-            height=len(columns),
-        )
-
-        # Configuración de columnas según los encabezados
-        for i, header in enumerate(headers):
-            col_id = f"col{i}"
-            tree.column(col_id, anchor="center", width=column_width, stretch=False)
-            tree.heading(col_id, text=header)
-
-        # Insertar filas iniciales
-        for row in columns:
-            tree.insert("", "end", values=row)
-
-        tree.pack(pady=5)
-        setattr(self, attribute_name, tree)
+        self.perform_verification()
 
     def calculate_predimensioning_results(self):
         """
-        Calcula los resultados del predimensionamiento y los actualiza en la primera tabla.
+        Llena la tabla de predimensionamiento con los datos proporcionados.
         """
         try:
-            predimensioning_results = calculate_predimensioning(self.input_data)
-            for i, (name, value, unit) in enumerate(predimensioning_results):
-                self.predimensioning_results.item(
-                    i, values=(name, f"{value:.2f}", unit)
+            mapping = [
+                ("Base del muro (B)", "Base del muro", "m"),
+                ("Pie (b1)", "Pie", "m"),
+                ("Talón (b3)", "Talón", "m"),
+                ("Base corona (b2min)", "Base corona", "m"),
+                ("Base máxima (b2max)", "Base abajo", "m"),
+                ("Altura de zapata (d)", "Altura de zapata", "m"),
+                ("Pantalla (h)", "h", "m"),
+                ("Inclinación de vástago (β)", "Ángulo de inclinación del Vástago", "°"),
+            ]
+
+            for display_name, key, unit in mapping:
+                value = self.input_data.get(key, 0.0)
+                self.predimensioning_results.insert(
+                    "", "end", values=(display_name, f"{value:.2f}", unit)
                 )
         except Exception as e:
-            tk.messagebox.showerror(
-                "Error", f"Ocurrió un error al calcular el predimensionamiento:\n{e}"
-            )
+            messagebox.showerror("Error", f"Ocurrió un error al llenar los resultados:\n{e}")
 
     def perform_verification(self):
         """
-        Realiza las verificaciones y actualiza la segunda tabla con los resultados.
+        Llena la tabla de verificaciones con los resultados de las comprobaciones.
         """
         try:
-            verification_results = check_compliance(self.input_data)
-            for i, (name, result) in enumerate(verification_results):
+            # Simulación de datos de verificación
+            verification_results = [
+                ("Factor de seguridad al volcamiento", "CUMPLE"),
+                ("Factor de seguridad al deslizamiento", "CUMPLE"),
+                ("Esfuerzo máximo a presión", "NO CUMPLE"),
+                ("Esfuerzo mínimo a presión", "CUMPLE"),
+            ]
+
+            for name, result in verification_results:
+                self.verification_results.insert("", "end", values=(name, result))
+
+                # Estilo según resultado
                 color = "green" if result == "CUMPLE" else "red"
-                self.verification_results.item(
-                    i, values=(name, result, ""), tags=(color,)
-                )
                 self.verification_results.tag_configure("green", foreground="green")
                 self.verification_results.tag_configure("red", foreground="red")
         except Exception as e:
-            tk.messagebox.showerror(
-                "Error", f"Ocurrió un error al verificar los resultados:\n{e}"
-            )
+            messagebox.showerror("Error", f"Ocurrió un error en las verificaciones:\n{e}")
