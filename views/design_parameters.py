@@ -50,7 +50,7 @@ class DesignParameters(tk.Tk):
         title.pack(pady=10)
 
         self.entries = {}
-        
+
         # Frame para organizar los campos en forma de tabla
         form_frame = tk.Frame(right_frame)
         form_frame.pack(fill="x", pady=5)
@@ -59,32 +59,44 @@ class DesignParameters(tk.Tk):
             # Crear un frame para cada fila
             row_frame = tk.Frame(form_frame)
             row_frame.pack(fill="x", pady=5)
-            
+
             # Label principal
             label = tk.Label(row_frame, text=label_text, anchor="e", width=30)
             label.pack(side="left", padx=(0, 5))
-            
+
             # Símbolo (si existe)
             if symbol:
-                symbol_label = tk.Label(row_frame, text=symbol, width=6, font=("Arial", 8) )
+                symbol_label = tk.Label(
+                    row_frame, text=symbol, width=6, font=("Arial", 8)
+                )
                 symbol_label.pack(side="left", padx=(0, 5))
-            
+
             # Entry o Combobox
             if key == "project_location":
                 widget = ttk.Combobox(
                     row_frame,
                     state="readonly",
-                    values=get_municipality(),
-                    width=20
+                    values=get_municipality() + ["Otro"],
+                    width=20,
                 )
-                widget.bind("<<ComboboxSelected>>", self.calculate_aa)
+                widget.bind("<<ComboboxSelected>>", self.handle_project_location)
+            elif key == "aa":  # Aceleración pico efectiva
+                widget = tk.Entry(
+                    row_frame, width=15, state="disabled"
+                )  # Bloqueado por defecto
             elif key == "concrete_resistance":
                 widget = ttk.Combobox(
-                    row_frame,
-                    state="readonly",
-                    values=CONCRETE_VALUES,
-                    width=12
+                    row_frame, state="readonly", values=CONCRETE_VALUES, width=12
                 )
+            elif key == "steel_resistance":  # Para el caso de `fy`
+                widget = tk.Label(
+                    row_frame,
+                    text="420",  # Valor constante
+                    font=("Arial", 10),
+                    width=12,
+                    anchor="w",
+                )
+                self.entries[key] = 420
             else:
                 widget = tk.Entry(row_frame, width=15)
             widget.pack(side="left", padx=(0, 5))
@@ -116,12 +128,34 @@ class DesignParameters(tk.Tk):
         btn_exit = tk.Button(right_frame, text="Salir", command=self.quit)
         btn_exit.pack(side="left", padx=5)
 
-    def calculate_aa(self, event):
+    def handle_project_location(self, event):
+        """
+        Maneja la selección del proyecto. Si el usuario selecciona "Otro",
+        habilita el campo para ingresar Aa manualmente.
+        Si selecciona una ubicación predefinida, muestra el valor calculado de Aa.
+        """
         location = self.entries["project_location"].get()
-        seismic_info = get_seismic_info(location)
-        aa_value = seismic_info["Aa"] if seismic_info else "0.0"
-        self.entries["aa"].delete(0, tk.END)
-        self.entries["aa"].insert(0, aa_value)
+        aa_entry = self.entries["aa"]  # Campo de Aa
+
+        if location == "Otro":
+            aa_entry.config(state="normal")  # Habilitar entrada manual
+            aa_entry.delete(0, tk.END)  # Limpiar cualquier valor previo
+        else:
+            # Deshabilitar el campo y calcular Aa automáticamente
+            aa_value = self.calculate_aa(location)  # Obtén el valor calculado de Aa
+            aa_entry.config(state="normal")  # Habilitar temporalmente para insertar el valor
+            aa_entry.delete(0, tk.END)
+            aa_entry.insert(0, aa_value)  # Mostrar el valor calculado
+            aa_entry.config(state="disabled")  # Bloquear nuevamente el campo
+
+
+    def calculate_aa(self, location):
+        """
+        Calcula el valor de Aa para una ubicación específica y lo devuelve.
+        """
+        seismic_info = get_seismic_info(location)  # Obtiene los datos sísmicos
+        return seismic_info.get("Aa", "0.0") if seismic_info else "0.0"  # Retorna Aa o un valor por defecto
+
 
     def get_factor(self, value, ranges, default=0):
         """
@@ -131,68 +165,108 @@ class DesignParameters(tk.Tk):
             if min_val <= value <= max_val:
                 return factor
         return default
-    
+
     def calculate_design(self):
         try:
-            # Lógica de cálculo usando los valores ingresados 
-            data = {key: entry.get() for key, entry in self.entries.items()}
+            # Lógica de cálculo usando los valores ingresados
+            data = {}
+            for key, entry in self.entries.items():
+                if isinstance(entry, (tk.Entry, ttk.Combobox)):
+                    raw_value = entry.get().strip()
+                    if raw_value == "":
+                        raise ValueError(f"El campo '{key}' está vacío. Por favor ingrese un valor.")
+                    # Reemplazar comas con puntos para manejar valores decimales
+                    value = raw_value.replace(",", ".")
+                    data[key] = value
+                else:
+                    # Para valores fijos como fy
+                    data[key] = entry
+
             wall_height = float(data.get("wall_height", 0))  # H
+            fy = data.get("steel_resistance", 420)  # el valor de fy
             
+            # Validar ángulo de inclinación del relleno (i)
+            angle_inclination = float(data.get("angle_inclination", 0))
+            if angle_inclination > 45:
+                raise ValueError("El ángulo de inclinación del relleno (i) no puede ser mayor a 45 grados.")
+
             # Validar la altura del muro
-            if wall_height <= 0:
-                raise ValueError("La altura del muro debe ser mayor a 0.")
-            
+            if wall_height < 1.5 or wall_height > 6.0:
+                raise ValueError(
+                    "Altura no admitida: Ingrese una altura entre 1.5m y 6m."
+                )
+
             # Cálculo de la base del muro (B)
-            base_factor = self.get_factor(wall_height, [
-                (1.5, 2, 0.5),
-                (2, 2.5, 0.49),
-                (2.5, 4.5, 0.48),
-                (4.5, 6, 0.47),
-            ])
+            base_factor = self.get_factor(
+                wall_height,
+                [
+                    (1.5, 2, 0.5),
+                    (2, 2.5, 0.49),
+                    (2.5, 4.5, 0.48),
+                    (4.5, 6, 0.47),
+                ],
+            )
             base_muro = wall_height * base_factor
-            
+
             # Cálculo del pie (b1)
-            pie_factor = self.get_factor(base_muro, [
-                (0.5, 1, 0.25),
-                (1, 1.5, 0.26),
-                (1.5, 2, 0.27),
-                (2, 2.5, 0.28),
-                (2.5, 3, 0.29),
-            ])
+            pie_factor = self.get_factor(
+                base_muro,
+                [
+                    (0.5, 1, 0.25),
+                    (1, 1.5, 0.26),
+                    (1.5, 2, 0.27),
+                    (2, 2.5, 0.28),
+                    (2.5, 3, 0.29),
+                ],
+            )
             pie = base_muro * pie_factor
-            
+
             # Cálculo del talón (b3)
-            talon_factor = self.get_factor(base_muro, [
-                (0.5, 1, 0.45),
-                (1, 1.5, 0.55),
-                (1.5, 2, 0.56),
-                (2, 2.5, 0.57),
-                (2.5, 3, 0.58),
-            ])
+            talon_factor = self.get_factor(
+                base_muro,
+                [
+                    (0.5, 1, 0.45),
+                    (1, 1.5, 0.55),
+                    (1.5, 2, 0.56),
+                    (2, 2.5, 0.57),
+                    (2.5, 3, 0.58),
+                ],
+            )
             talon = base_muro * talon_factor
-            
+
             # Cálculo de la base corona (b2min)
-            base_corona = self.get_factor(wall_height, [
-                (1.5, 3.5, 0.25),
-                (3.5, 5.5, 0.30),
-            ], default=0.35)
-            
+            base_corona = self.get_factor(
+                wall_height,
+                [
+                    (1.5, 3.5, 0.25),
+                    (3.5, 5.5, 0.30),
+                ],
+                default=0.35,
+            )
+
             # Cálculo de la base inferior (b2max)
             base_abajo = base_muro - pie - talon
-            
+
             # Cálculo de la altura de zapata (d)
-            altura_zapata = self.get_factor(wall_height, [
-                (1.5, 2, 0.20),
-                (2, 2.5, 0.18),
-                (2.5, 3, 0.15),
-            ], default=0.11) * wall_height
-            
-             # Cálculo de la altura de la pantalla (h)
+            altura_zapata = (
+                self.get_factor(
+                    wall_height,
+                    [
+                        (1.5, 2, 0.20),
+                        (2, 2.5, 0.18),
+                        (2.5, 3, 0.15),
+                    ],
+                    default=0.11,
+                )
+                * wall_height
+            )
+
+            # Cálculo de la altura de la pantalla (h)
             altura_pantalla = wall_height - altura_zapata
-            
+
             # Cálculo del ángulo de inclinación del vástago (β)
             inclinacion = degrees(atan((base_abajo - base_corona) / altura_pantalla))
-            
+
             # Resultados
             results = {
                 "Base del muro": base_muro,
@@ -203,8 +277,9 @@ class DesignParameters(tk.Tk):
                 "Altura de zapata": altura_zapata,
                 "h": altura_pantalla,
                 "Ángulo de inclinación del Vástago": inclinacion,
+                "Resistencia del acero (fy)": fy,
             }
-            
+
             # Mostrar resultados
             print(results)
             Predimensioning(self, results)
@@ -215,14 +290,35 @@ class DesignParameters(tk.Tk):
             tk.messagebox.showerror("Error", f"Ocurrió un error inesperado: {e}")
 
     def clear_entries(self):
+        """
+        Limpia todos los campos del formulario generados dinámicamente,
+        incluidos combobox, entradas de texto y valores calculados.
+        """
         if messagebox.askyesno(
-            "Confirmación", "¿Estás seguro de que deseas limpiar los campos?"
+            "Confirmación", "¿Estás seguro de que deseas limpiar todos los campos?"
         ):
-            for key, entry in self.entries.items():
-                if isinstance(entry, tk.Entry):
-                    entry.delete(0, tk.END)
-                elif isinstance(entry, ttk.Combobox):
-                    entry.set("")
+            for key, widget in self.entries.items():
+                # Limpiar Entry
+                if isinstance(widget, tk.Entry):
+                    widget.delete(0, tk.END)
+                # Limpiar Combobox
+                elif isinstance(widget, ttk.Combobox):
+                    widget.set("")
+                # Ignorar Label fijo como fy
+                elif isinstance(widget, tk.Label):
+                    continue
+
+            # Limpieza específica para campos mencionados
+            if "project_location" in self.entries:
+                self.entries["project_location"].set("")
+            if "concrete_resistance" in self.entries:
+                self.entries["concrete_resistance"].set("")
+
+            # Mostrar un mensaje opcional de confirmación
+            tk.messagebox.showinfo(
+                "Formulario Limpiado",
+                "Todos los campos han sido reiniciados correctamente.",
+            )
 
 
 if __name__ == "__main__":

@@ -10,7 +10,7 @@ FORM_FIELDS = [
     ("Resistencia del concreto", "fc", "concrete_resistance", "MPa"),
     ("Resistencia del acero", "fy", "steel_resistance", "MPa"),
     ("Altura de muro", "H", "wall_height", "m"),
-    ("Ángulo de inclinación del relleno", "i", "angle_soil_wall", "°"),
+    ("Ángulo de inclinación del relleno", "i", "angle_inclination", "°"),
     ("Ubicación del proyecto", "", "project_location", ""),
     ("Aceleración pico efectiva", "Aa", "aa", ""),
 ]
