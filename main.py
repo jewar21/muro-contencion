@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import messagebox
 from views.design_parameters import DesignParameters
 
 def main():
@@ -11,7 +12,7 @@ def main():
         app = DesignParameters()
         app.mainloop()
     except Exception as e:
-        print(f"Error al iniciar la aplicación: {e}")
+        messagebox.showerror("Error", f"Error al iniciar la aplicación:\n{e}")
 
 if __name__ == "__main__":
     main()
