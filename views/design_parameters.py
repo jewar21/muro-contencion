@@ -32,7 +32,8 @@ class DesignParameters(tk.Tk):
         # Lado izquierdo: Imagen
         left_frame = tk.Frame(main_frame)
         left_frame.grid(row=0, column=0, sticky="ns", padx=10)
-        img_path = os.path.join("assets", "images", "Dibujo1-Presentación1.png")
+        img_path = os.path.join(
+            "assets", "images", "Dibujo1-Presentación1.png")
         img = Image.open(img_path)
         img = img.resize((390, 390), Image.LANCZOS)
         img_tk = ImageTk.PhotoImage(img)
@@ -79,7 +80,8 @@ class DesignParameters(tk.Tk):
                     values=get_municipality() + ["Otro"],
                     width=20,
                 )
-                widget.bind("<<ComboboxSelected>>", self.handle_project_location)
+                widget.bind("<<ComboboxSelected>>",
+                            self.handle_project_location)
             elif key == "aa":  # Aceleración pico efectiva
                 widget = tk.Entry(
                     row_frame, width=15, state="disabled"
@@ -142,20 +144,21 @@ class DesignParameters(tk.Tk):
             aa_entry.delete(0, tk.END)  # Limpiar cualquier valor previo
         else:
             # Deshabilitar el campo y calcular Aa automáticamente
-            aa_value = self.calculate_aa(location)  # Obtén el valor calculado de Aa
-            aa_entry.config(state="normal")  # Habilitar temporalmente para insertar el valor
+            # Obtén el valor calculado de Aa
+            aa_value = self.calculate_aa(location)
+            # Habilitar temporalmente para insertar el valor
+            aa_entry.config(state="normal")
             aa_entry.delete(0, tk.END)
             aa_entry.insert(0, aa_value)  # Mostrar el valor calculado
             aa_entry.config(state="disabled")  # Bloquear nuevamente el campo
-
 
     def calculate_aa(self, location):
         """
         Calcula el valor de Aa para una ubicación específica y lo devuelve.
         """
         seismic_info = get_seismic_info(location)  # Obtiene los datos sísmicos
-        return seismic_info.get("Aa", "0.0") if seismic_info else "0.0"  # Retorna Aa o un valor por defecto
-
+        # Retorna Aa o un valor por defecto
+        return seismic_info.get("Aa", "0.0") if seismic_info else "0.0"
 
     def get_factor(self, value, ranges, default=0):
         """
@@ -168,51 +171,51 @@ class DesignParameters(tk.Tk):
 
     def calculate_design(self):
         factors_by_aa = {
-                # (Rangos y factores para inclinación 0)
-                0.15: {"base_factor": [(1.5, 2, 0.5),(2, 2.5, 0.49),(2.5, 3, 0.48),(3.5, 5.5, 0.48),(5.5, 6, 0.47)], 
-                       "pie_factor": [(0.5, 1, 0.23),(1, 1.5, 0.26),(1.5, 2, 0.27),(2, 3, 0.29)], 
-                       "talon_factor": [(0.5, 1, 0.44),(1, 1.5, 0.50),(1.5, 2, 0.55),(2, 2.5, 0.56),(2.5, 3, 0.57)]
-                       },
-                0.20: {"base_factor": [(1.5, 2, 0.53),(2, 2.5, 0.52),(2.5, 3, 0.51),(3, 6, 0.50)], 
-                       "pie_factor": [(0.5, 1, 0.23),(1, 1.5, 0.25),(1.5, 2.5, 0.28),(2.5, 3, 0.29)], 
-                       "talon_factor": [(0.5, 1, 0.46),(1, 1.5, 0.50),(1.5, 2, 0.55),(2, 2.5, 0.57),(2.5, 3, 0.58)]
-                        },
-                0.25: {"base_factor": [(1.5, 2, 0.56),(2, 2.5, 0.55),(2.5, 3, 0.54),(3, 5, 0.53),(5, 6, 0.52)], 
-                       "pie_factor": [(0.5, 1, 0.23),(1, 1.5, 0.25),(1.5, 2, 0.27),(2, 2.5, 0.28),(2.5, 3.5, 0.29)], 
-                       "talon_factor": [(0.5, 1, 0.46),(1, 1.5, 0.50),(1.5, 2, 0.56),(2, 2.5, 0.57),(2.5, 3, 0.58),(3, 3.5, 0.59)]
-                        },
-                0.30: {"base_factor": [(1.5, 2, 0.59),(2, 2.5, 0.57),(2.5, 3, 0.56),(3, 6, 0.55)], 
-                       "pie_factor": [(0.5, 1, 0.24),(1, 1.5, 0.25),(1.5, 2, 0.27),(2, 2.5, 0.28),(2.5, 3.5, 0.29)], 
-                       "talon_factor": [(0.5, 1, 0.46),(1, 1.5, 0.50),(1.5, 2, 0.56),(2, 2.5, 0.57),(2.5, 3, 0.58),(3, 3.5, 0.59)]
-                        },
-                0.35: {"base_factor": [(1.5, 2, 0.63),(2, 2.5, 0.60),(2.5, 3.5, 0.59),(3.5, 5.5, 0.58),(5.5, 6, 0.57)], 
-                       "pie_factor": [(0.5, 1, 0.24),(1, 1.5, 0.25),(1.5, 2, 0.27),(2, 2.5, 0.28),(2.5, 3, 0.29),(3, 3.5, 0.30)], 
-                       "talon_factor": [(0.5, 1, 0.46),(1, 1.5, 0.50),(1.5, 2, 0.56),(2, 2.5, 0.57),(2.5, 3, 0.58),(3, 3.5, 0.59)]
-                        },
+            # (Rangos y factores para inclinación 0)
+            0.15: {"base_factor": [(1.5, 2, 0.5), (2, 2.5, 0.49), (2.5, 3, 0.48), (3.5, 5.5, 0.48), (5.5, 6, 0.47)],
+                   "pie_factor": [(0.5, 1, 0.23), (1, 1.5, 0.26), (1.5, 2, 0.27), (2, 3, 0.29)],
+                   "talon_factor": [(0.5, 1, 0.44), (1, 1.5, 0.50), (1.5, 2, 0.55), (2, 2.5, 0.56), (2.5, 3, 0.57)]
+                   },
+            0.20: {"base_factor": [(1.5, 2, 0.53), (2, 2.5, 0.52), (2.5, 3, 0.51), (3, 6, 0.50)],
+                   "pie_factor": [(0.5, 1, 0.23), (1, 1.5, 0.25), (1.5, 2.5, 0.28), (2.5, 3, 0.29)],
+                   "talon_factor": [(0.5, 1, 0.46), (1, 1.5, 0.50), (1.5, 2, 0.55), (2, 2.5, 0.57), (2.5, 3, 0.58)]
+                   },
+            0.25: {"base_factor": [(1.5, 2, 0.56), (2, 2.5, 0.55), (2.5, 3, 0.54), (3, 5, 0.53), (5, 6, 0.52)],
+                   "pie_factor": [(0.5, 1, 0.23), (1, 1.5, 0.25), (1.5, 2, 0.27), (2, 2.5, 0.28), (2.5, 3.5, 0.29)],
+                   "talon_factor": [(0.5, 1, 0.46), (1, 1.5, 0.50), (1.5, 2, 0.56), (2, 2.5, 0.57), (2.5, 3, 0.58), (3, 3.5, 0.59)]
+                   },
+            0.30: {"base_factor": [(1.5, 2, 0.59), (2, 2.5, 0.57), (2.5, 3, 0.56), (3, 6, 0.55)],
+                   "pie_factor": [(0.5, 1, 0.24), (1, 1.5, 0.25), (1.5, 2, 0.27), (2, 2.5, 0.28), (2.5, 3.5, 0.29)],
+                   "talon_factor": [(0.5, 1, 0.46), (1, 1.5, 0.50), (1.5, 2, 0.56), (2, 2.5, 0.57), (2.5, 3, 0.58), (3, 3.5, 0.59)]
+                   },
+            0.35: {"base_factor": [(1.5, 2, 0.63), (2, 2.5, 0.60), (2.5, 3.5, 0.59), (3.5, 5.5, 0.58), (5.5, 6, 0.57)],
+                   "pie_factor": [(0.5, 1, 0.24), (1, 1.5, 0.25), (1.5, 2, 0.27), (2, 2.5, 0.28), (2.5, 3, 0.29), (3, 3.5, 0.30)],
+                   "talon_factor": [(0.5, 1, 0.46), (1, 1.5, 0.50), (1.5, 2, 0.56), (2, 2.5, 0.57), (2.5, 3, 0.58), (3, 3.5, 0.59)]
+                   },
         }
-            
+
         factors_by_aa_inclined = {
-                # (Rangos y factores para inclinación > 0)
-                0.15: {"base_factor": [(1.5, 2, 0.64),(2, 5.5, 0.63),(5.5, 6, 0.62)], 
-                       "pie_factor": [(0.5, 1, 0.24),(1, 1.5, 0.25),(1.5, 2, 0.28),(2, 2.5, 0.29),(2.5, 4, 0.30)],                       
-                       "talon_factor": [(0.5, 1, 0.49),(1, 1.5, 0.50),(1.5, 2, 0.55),(2, 2.5, 0.57),(2.5, 3, 0.58),(3, 3.5, 0.59),(3.5, 4, 0.60)]
-                       },
-                0.20: {"base_factor": [(1.5, 2, 0.7),(2, 2.5, 0.69),(2.5, 3, 0.68),(3, 6, 0.67)], 
-                       "pie_factor": [(1, 1.5, 0.26),(1.5, 2, 0.28),(2, 3.5, 0.30),(3.5, 4.5, 0.31)], 
-                       "talon_factor": [(1, 1.5, 0.50),(1.5, 2, 0.55),(2, 2.5, 0.57),(2.5, 3, 0.58),(3, 4.5, 0.59)]
-                        },
-                0.25: {"base_factor": [(1.5, 2, 0.76),(2, 2.5, 0.75),(2.5, 4.5, 0.74),(4.5, 6, 0.73)], 
-                       "pie_factor": [(1, 1.5, 0.27),(1.5, 2, 0.28),(2, 3.5, 0.30),(3.5, 4.5, 0.31)], 
-                       "talon_factor": [(1, 1.5, 0.51),(1.5, 2, 0.55),(2, 2.5, 0.57),(2.5, 3, 0.58),(3, 3.5, 0.59),(3.5, 4.5, 0.60)]
-                        },
-                0.30: {"base_factor": [(1.5, 2, 0.83),(2, 3, 0.82),(3, 3.5, 0.81),(3.5, 6, 0.80)], 
-                       "pie_factor": [(1, 1.5, 0.27),(1.5, 2, 0.28),(2, 2.5, 0.29),(2.5, 3.5, 0.30),(3.5, 5, 0.31)], 
-                       "talon_factor": [(1, 1.5, 0.53),(1.5, 2, 0.56),(2, 2.5, 0.58),(2.5, 3, 0.59),(3, 4, 0.60),(4, 5, 0.61)]
-                        },
-                0.35: {"base_factor": [(1.5, 2.5, 0.96),(2.5, 3.5, 0.95),(3.5, 6, 0.94)], 
-                       "pie_factor": [(1, 1.5, 0.27),(1.5, 2, 0.28),(2, 2.5, 0.29),(2.5, 3, 0.30),(3, 6, 0.31)], 
-                       "talon_factor": [(1, 1.5, 0.55),(1.5, 2, 0.56),(2, 2.5, 0.57),(2.5, 3, 0.59),(3, 4, 0.60),(4, 4.5, 0.61),(4.5, 6, 0.62)]
-                        },
+            # (Rangos y factores para inclinación > 0)
+            0.15: {"base_factor": [(1.5, 2, 0.64), (2, 5.5, 0.63), (5.5, 6, 0.62)],
+                   "pie_factor": [(0.5, 1, 0.24), (1, 1.5, 0.25), (1.5, 2, 0.28), (2, 2.5, 0.29), (2.5, 4, 0.30)],
+                   "talon_factor": [(0.5, 1, 0.49), (1, 1.5, 0.50), (1.5, 2, 0.55), (2, 2.5, 0.57), (2.5, 3, 0.58), (3, 3.5, 0.59), (3.5, 4, 0.60)]
+                   },
+            0.20: {"base_factor": [(1.5, 2, 0.7), (2, 2.5, 0.69), (2.5, 3, 0.68), (3, 6, 0.67)],
+                   "pie_factor": [(1, 1.5, 0.26), (1.5, 2, 0.28), (2, 3.5, 0.30), (3.5, 4.5, 0.31)],
+                   "talon_factor": [(1, 1.5, 0.50), (1.5, 2, 0.55), (2, 2.5, 0.57), (2.5, 3, 0.58), (3, 4.5, 0.59)]
+                   },
+            0.25: {"base_factor": [(1.5, 2, 0.76), (2, 2.5, 0.75), (2.5, 4.5, 0.74), (4.5, 6, 0.73)],
+                   "pie_factor": [(1, 1.5, 0.27), (1.5, 2, 0.28), (2, 3.5, 0.30), (3.5, 4.5, 0.31)],
+                   "talon_factor": [(1, 1.5, 0.51), (1.5, 2, 0.55), (2, 2.5, 0.57), (2.5, 3, 0.58), (3, 3.5, 0.59), (3.5, 4.5, 0.60)]
+                   },
+            0.30: {"base_factor": [(1.5, 2, 0.83), (2, 3, 0.82), (3, 3.5, 0.81), (3.5, 6, 0.80)],
+                   "pie_factor": [(1, 1.5, 0.27), (1.5, 2, 0.28), (2, 2.5, 0.29), (2.5, 3.5, 0.30), (3.5, 5, 0.31)],
+                   "talon_factor": [(1, 1.5, 0.53), (1.5, 2, 0.56), (2, 2.5, 0.58), (2.5, 3, 0.59), (3, 4, 0.60), (4, 5, 0.61)]
+                   },
+            0.35: {"base_factor": [(1.5, 2.5, 0.96), (2.5, 3.5, 0.95), (3.5, 6, 0.94)],
+                   "pie_factor": [(1, 1.5, 0.27), (1.5, 2, 0.28), (2, 2.5, 0.29), (2.5, 3, 0.30), (3, 6, 0.31)],
+                   "talon_factor": [(1, 1.5, 0.55), (1.5, 2, 0.56), (2, 2.5, 0.57), (2.5, 3, 0.59), (3, 4, 0.60), (4, 4.5, 0.61), (4.5, 6, 0.62)]
+                   },
         }
         
         try:
@@ -222,7 +225,8 @@ class DesignParameters(tk.Tk):
                 if isinstance(entry, (tk.Entry, ttk.Combobox)):
                     raw_value = entry.get().strip()
                     if raw_value == "":
-                        raise ValueError(f"El campo '{key}' está vacío. Por favor ingrese un valor.")
+                        raise ValueError(
+                            f"El campo '{key}' está vacío. Por favor ingrese un valor.")
                     # Reemplazar comas con puntos para manejar valores decimales
                     value = raw_value.replace(",", ".")
                     data[key] = value
@@ -232,73 +236,40 @@ class DesignParameters(tk.Tk):
 
             wall_height = float(data.get("wall_height", 0))  # H
             angle_inclination = float(data.get("angle_inclination", 0))
-            fy = data.get("steel_resistance", 420)  # el valor de fy, resistencia del acero
+            # el valor de fy, resistencia del acero
+            fy = data.get("steel_resistance", 420)
             aa = float(data.get("aa", 0))
-            
+
             # Validar ángulo de inclinación del relleno (i)
             if angle_inclination > 45:
-                raise ValueError("El ángulo de inclinación del relleno (i) no puede ser mayor a 45 grados.")
+                raise ValueError(
+                    "El ángulo de inclinación del relleno (i) no puede ser mayor a 45 grados.")
 
             # Validar la altura del muro
             if wall_height < 1.5 or wall_height > 6.0:
                 raise ValueError(
                     "Altura no admitida: Ingrese una altura entre 1.5m y 6m."
                 )
-            
+
             # Seleccionar el conjunto de factores según el ángulo
             factors = factors_by_aa if angle_inclination == 0 else factors_by_aa_inclined
-            
+
             # Validar que Aa esté en los factores
             if aa not in factors:
-                raise ValueError(f"El valor de Aa ({aa}) no es válido o no tiene factores asignados.")
-            
+                raise ValueError(
+                    f"El valor de Aa ({aa}) no es válido o no tiene factores asignados.")
+
             # Obtener factores para base, pie y talón
-            base_factor = self.get_factor(wall_height, factors[aa]["base_factor"])
-            pie_factor = self.get_factor(wall_height, factors[aa]["pie_factor"])
-            talon_factor = self.get_factor(wall_height, factors[aa]["talon_factor"])
-            
-            # Calcular valores
-            base_muro = wall_height * base_factor
-            pie = base_muro * pie_factor
-            talon = base_muro * talon_factor
+            base_factor = self.get_factor(
+                wall_height, factors[aa]["base_factor"])
+            base_muro = round((wall_height * base_factor), 2)
 
-            # # Cálculo de la base del muro (B)
-            # base_factor = self.get_factor(
-            #     wall_height,
-            #     [
-            #         (1.5, 2, 0.5),
-            #         (2, 2.5, 0.49),
-            #         (2.5, 4.5, 0.48),
-            #         (4.5, 6, 0.47),
-            #     ],
-            # )
-            # base_muro = wall_height * base_factor
+            pie_factor = self.get_factor(base_muro, factors[aa]["pie_factor"])
+            talon_factor = self.get_factor(
+                base_muro, factors[aa]["talon_factor"])
 
-            # # Cálculo del pie (b1)
-            # pie_factor = self.get_factor(
-            #     base_muro,
-            #     [
-            #         (0.5, 1, 0.25),
-            #         (1, 1.5, 0.26),
-            #         (1.5, 2, 0.27),
-            #         (2, 2.5, 0.28),
-            #         (2.5, 3, 0.29),
-            #     ],
-            # )
-            # pie = base_muro * pie_factor
-
-            # # Cálculo del talón (b3)
-            # talon_factor = self.get_factor(
-            #     base_muro,
-            #     [
-            #         (0.5, 1, 0.45),
-            #         (1, 1.5, 0.55),
-            #         (1.5, 2, 0.56),
-            #         (2, 2.5, 0.57),
-            #         (2.5, 3, 0.58),
-            #     ],
-            # )
-            # talon = base_muro * talon_factor
+            pie = round((base_muro * pie_factor), 2)
+            talon = round((base_muro * talon_factor), 2)
 
             # Cálculo de la base corona (b2min)
             base_corona = self.get_factor(
@@ -309,7 +280,7 @@ class DesignParameters(tk.Tk):
                 ],
                 default=0.35,
             )
-            
+
             # Cálculo de la altura de zapata (d)
             altura_zapata = (
                 self.get_factor(
@@ -325,13 +296,13 @@ class DesignParameters(tk.Tk):
             )
 
             # Cálculo de la base inferior (b2max)
-            base_abajo = base_muro - pie - talon
-
+            base_abajo = round((base_muro - pie - talon), 2)
             # Cálculo de la altura de la pantalla (h)
-            altura_pantalla = wall_height - altura_zapata
-
+            altura_pantalla = round((wall_height - altura_zapata), 2)
             # Cálculo del ángulo de inclinación del vástago (β)
-            inclinacion = degrees(atan((base_abajo - base_corona) / altura_pantalla))
+            inclinacion = round((degrees(
+                atan((base_abajo - base_corona) / altura_pantalla))), 2)
+            # print("inclinacion", base_abajo, base_corona, altura_pantalla)
 
             # Resultados
             results = {
@@ -353,7 +324,8 @@ class DesignParameters(tk.Tk):
         except ValueError as e:
             tk.messagebox.showerror("Error", f"Entrada inválida: {e}")
         except Exception as e:
-            tk.messagebox.showerror("Error", f"Ocurrió un error inesperado: {e}")
+            tk.messagebox.showerror(
+                "Error", f"Ocurrió un error inesperado: {e}")
 
     def clear_entries(self):
         """
