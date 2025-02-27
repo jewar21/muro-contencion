@@ -1,5 +1,5 @@
 from tkinter import ttk, messagebox
-from math import atan, degrees
+from math import atan, degrees, radians
 
 from models.project_data import (
     FACTORS_BY_AA,
@@ -76,9 +76,9 @@ def get_factor(value, ranges, default=0):
 def validate_inputs(data):
     # Valida los valores ingresados por el usuario y devuelve un diccionario con valores procesados.
     try:
+        fy = float(data.get("steel_resistance", 420))
         wall_height = float(data.get("wall_height", 0))
         angle_inclination = float(data.get("angle_inclination", 0))
-        fy = float(data.get("steel_resistance", 420))
         aa = float(data.get("aa", 0))
 
         # Validaciones de los valores de entrada
@@ -91,10 +91,10 @@ def validate_inputs(data):
                 "Altura no admitida: Ingrese una altura entre 1.5m y 6m.")
 
         return {
+            "fy": fy,
             "wall_height": wall_height,
             "angle_inclination": angle_inclination,
-            "fy": fy,
-            "aa": aa
+            "aa": aa,
         }
     except ValueError as e:
         raise ValueError(f"Error en la validación de datos: {e}")
@@ -106,6 +106,7 @@ def calculate_design_logic(data):
     """
     try:
         validated_data = validate_inputs(data)
+
         wall_height = validated_data["wall_height"]
         angle_inclination = validated_data["angle_inclination"]
         fy = validated_data["fy"]
@@ -161,9 +162,8 @@ def calculate_design_logic(data):
         # Cálculo de la altura de la pantalla (h)
         altura_pantalla = round((wall_height - altura_zapata), 2)
         # Cálculo del ángulo de inclinación del vástago (β)
-        inclinacion = round((degrees(
-            atan((base_vastago - base_corona) / altura_pantalla))), 2)
-        # print("inclinacion", base_abajo, base_corona, altura_pantalla)
+        beta_rad = radians(round((degrees(
+            atan((base_vastago - base_corona) / altura_pantalla))), 2))
 
         # Resultados
         results = {
@@ -174,8 +174,8 @@ def calculate_design_logic(data):
             "Base vástago": base_vastago,
             "Altura de zapata": altura_zapata,
             "h": altura_pantalla,
-            "Ángulo de inclinación del Vástago": inclinacion,  # beta_rad
-            "Resistencia del acero (fy)": fy,
+            "Ángulo de inclinación del Vástago": beta_rad,
+            "Resistencia del acero (fy)": fy
         }
 
         # Mostrar resultados

@@ -38,7 +38,7 @@ class DesignParameters(tk.Tk):
         left_frame = tk.Frame(main_frame)
         left_frame.grid(row=0, column=0, sticky="ns", padx=10)
         img_path = os.path.join(
-            "assets", "images", "Dibujo1-Presentación1.png")
+            "assets", "images", "imagen_main.png")
         img = Image.open(img_path)
         img = img.resize((390, 390), Image.LANCZOS)
         img_tk = ImageTk.PhotoImage(img)
@@ -207,10 +207,9 @@ class DesignParameters(tk.Tk):
                     data[key] = "420"
                 else:
                     data[key] = entry  # Para valores fijos como fy
-
             # Llamar a la lógica de cálculo
             results = calculate_design_logic(data)
-            Predimensioning(self, results)
+            Predimensioning(self, results, data)
 
         except ValueError as e:
             tk.messagebox.showerror("Error", f"Entrada inválida: {e}")

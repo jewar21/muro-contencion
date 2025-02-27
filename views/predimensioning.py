@@ -5,13 +5,17 @@ from PIL import Image, ImageTk
 
 
 class Predimensioning(tk.Toplevel):
-    def __init__(self, root, input_data):
+    def __init__(self, root, input_data, full_data):
         super().__init__(root)
         self.input_data = input_data
+        self.full_data = full_data
         self.title("Cálculo de Muros - Predimensionamiento")
         self.geometry("900x600")
         self.resizable(False, False)
 
+        print("Datos ingresados por el usuario:", self.full_data)  # Para depuración
+        print("Resultados de predimensionamiento:", self.input_data)  # Para depuración
+        
         self.setup_ui()
 
     def setup_ui(self):
@@ -24,7 +28,7 @@ class Predimensioning(tk.Toplevel):
         left_frame.grid(row=0, column=0, sticky="ns", padx=10, pady=10)
 
         # Mostrar imagen
-        img_path = os.path.join("assets", "images", "design.png")
+        img_path = os.path.join("assets", "images", "imagen_predimensioning.png")
         try:
             img = Image.open(img_path)
             img = img.resize((400, 300), Image.LANCZOS)
@@ -53,25 +57,12 @@ class Predimensioning(tk.Toplevel):
         self.predimensioning_results.column("unit", anchor="center", width=80)
         self.predimensioning_results.pack(pady=10)
 
-        # Tabla 2: Verificaciones
-        verification_title = tk.Label(right_frame, text="Verificaciones", font=("Arial", 12, "bold"))
-        verification_title.pack(pady=5)
-        self.verification_results = ttk.Treeview(
-            right_frame, columns=("name", "result"), show="headings", height=5
-        )
-        self.verification_results.heading("name", text="Parámetro")
-        self.verification_results.heading("result", text="Resultado")
-        self.verification_results.column("name", anchor="w", width=200)
-        self.verification_results.column("result", anchor="center", width=100)
-        self.verification_results.pack(pady=10)
-
         # Botón para cerrar
         close_button = tk.Button(right_frame, text="Cerrar", command=self.destroy)
         close_button.pack(pady=10)
 
         # Llenar los datos
         self.calculate_predimensioning_results()
-        self.perform_verification()
 
     def calculate_predimensioning_results(self):
         """
@@ -88,7 +79,6 @@ class Predimensioning(tk.Toplevel):
                 ("Pantalla (h)", "h", "m"),
                 ("Inclinación de vástago (β)", "Ángulo de inclinación del Vástago", "°"),
             ]
-
             for display_name, key, unit in mapping:
                 value = self.input_data.get(key, 0.0)
                 self.predimensioning_results.insert(
@@ -96,26 +86,18 @@ class Predimensioning(tk.Toplevel):
                 )
         except Exception as e:
             messagebox.showerror("Error", f"Ocurrió un error al llenar los resultados:\n{e}")
-
-    def perform_verification(self):
-        """
-        Llena la tabla de verificaciones con los resultados de las comprobaciones.
-        """
-        try:
-            # Simulación de datos de verificación
-            verification_results = [
-                ("Factor de seguridad al volcamiento", "CUMPLE"),
-                ("Factor de seguridad al deslizamiento", "CUMPLE"),
-                ("Esfuerzo máximo a presión", "NO CUMPLE"),
-                ("Esfuerzo mínimo a presión", "CUMPLE"),
-            ]
-
-            for name, result in verification_results:
-                self.verification_results.insert("", "end", values=(name, result))
-
-                # Estilo según resultado
-                color = "green" if result == "CUMPLE" else "red"
-                self.verification_results.tag_configure("green", foreground="green")
-                self.verification_results.tag_configure("red", foreground="red")
-        except Exception as e:
-            messagebox.showerror("Error", f"Ocurrió un error en las verificaciones:\n{e}")
+            
+            # NOTA:
+            #     angle_friction = radians(float(data.get("angle_friction", 0)))
+            #     angle_soil_wall = radians(float(data.get("angle_soil_wall", 0)))
+            #     unit_weight = float(data.get("unit_weight", 0))
+            #     soil_bearing_capacity = float(data.get("soil_bearing_capacity", 0))
+            #     concrete_resistance = float(data.get("concrete_resistance", 0))
+            #     fy = float(data.get("steel_resistance", 420))
+            #     wall_height = float(data.get("wall_height", 0))
+            #     angle_inclination = float(data.get("angle_inclination", 0))
+            #     aa = float(data.get("aa", 0))
+            #     pga = float(data.get("pga", 0))
+            #     diente = float(data.get("diente", 0))
+            #     type_soil = data.get("type_soil") 
+            

@@ -8,14 +8,14 @@ FORM_FIELDS = [
     ("Angulo de fricción interna de relleno", "ø", "angle_friction", "°"),
     ("Ángulo de fricción suelo-muro", "δ", "angle_soil_wall", "°"),
     ("Peso unitario del relleno", "γrelleno", "unit_weight", "T/m³"),
-    ("Esfuerzo admisible del suelo", "σadm", "soil_bearing_capacity", "KN/m²"),
+    ("Capacidad portante del suelo", "qN", "soil_bearing_capacity", "KN/m²"),
     ("Resistencia del concreto", "fc", "concrete_resistance", "MPa"),
     ("Resistencia del acero", "fy", "steel_resistance", "MPa"),
     ("Altura de muro", "H", "wall_height", "m"),
     ("Ángulo de inclinación del relleno", "i", "angle_inclination", "°"),
     ("Ubicación del proyecto", "", "project_location", ""),
     ("Aceleración pico efectiva", "Aa", "aa", ""),
-    ("PGA", "PGA", "pga", ""),
+    ("Coeficiente de aceleración pico efectiva en roca", "PGA", "pga", ""),
     ("Diente", "diente", "diente", "m"),
     ("Tipo de suelo", "", "type_soil", "")
 ]
