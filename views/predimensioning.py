@@ -2,7 +2,6 @@ import os
 import tkinter as tk
 from tkinter import ttk, messagebox
 from PIL import Image, ImageTk
-from math import atan, degrees
 
 
 class Predimensioning(tk.Toplevel):
@@ -84,7 +83,7 @@ class Predimensioning(tk.Toplevel):
                 ("Pie (b1)", "Pie", "m"),
                 ("Talón (b3)", "Talón", "m"),
                 ("Base corona (b2min)", "Base corona", "m"),
-                ("Base máxima (b2max)", "Base abajo", "m"),
+                ("Base máxima (b2max)", "Base vástago", "m"),
                 ("Altura de zapata (d)", "Altura de zapata", "m"),
                 ("Pantalla (h)", "h", "m"),
                 ("Inclinación de vástago (β)", "Ángulo de inclinación del Vástago", "°"),

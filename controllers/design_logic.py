@@ -171,7 +171,7 @@ def calculate_design_logic(data):
             "Pie": pie,
             "Talón": talon,
             "Base corona": base_corona,
-            "Base vastago": base_vastago,
+            "Base vástago": base_vastago,
             "Altura de zapata": altura_zapata,
             "h": altura_pantalla,
             "Ángulo de inclinación del Vástago": inclinacion,  # beta_rad

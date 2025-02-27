@@ -11,9 +11,7 @@ from models.project_data import (
     CONCRETE_VALUES,
     DIENTE_VALUES,
     TYPE_SOIL_VALUES,
-    FORM_FIELDS,
-    FACTORS_BY_AA,
-    FACTORS_BY_AA_INCLINED
+    FORM_FIELDS
 )
 from controllers.design_logic import calculate_design_logic
 
@@ -191,58 +189,11 @@ class DesignParameters(tk.Tk):
             if min_val <= value <= max_val:
                 return factor
         return default
-    
+
     def calculate_design(self):
-        factors_by_aa = {
-            # (Rangos y factores para inclinación 0)
-            0.15: {"base_factor": [(1.5, 2, 0.5), (2, 2.5, 0.49), (2.5, 3, 0.48), (3.5, 5.5, 0.48), (5.5, 6, 0.47)],
-                   "pie_factor": [(0.5, 1, 0.23), (1, 1.5, 0.26), (1.5, 2, 0.27), (2, 3, 0.29)],
-                   "talon_factor": [(0.5, 1, 0.44), (1, 1.5, 0.50), (1.5, 2, 0.55), (2, 2.5, 0.56), (2.5, 3, 0.57)]
-                   },
-            0.20: {"base_factor": [(1.5, 2, 0.53), (2, 2.5, 0.52), (2.5, 3, 0.51), (3, 6, 0.50)],
-                   "pie_factor": [(0.5, 1, 0.23), (1, 1.5, 0.25), (1.5, 2.5, 0.28), (2.5, 3, 0.29)],
-                   "talon_factor": [(0.5, 1, 0.46), (1, 1.5, 0.50), (1.5, 2, 0.55), (2, 2.5, 0.57), (2.5, 3, 0.58)]
-                   },
-            0.25: {"base_factor": [(1.5, 2, 0.56), (2, 2.5, 0.55), (2.5, 3, 0.54), (3, 5, 0.53), (5, 6, 0.52)],
-                   "pie_factor": [(0.5, 1, 0.23), (1, 1.5, 0.25), (1.5, 2, 0.27), (2, 2.5, 0.28), (2.5, 3.5, 0.29)],
-                   "talon_factor": [(0.5, 1, 0.46), (1, 1.5, 0.50), (1.5, 2, 0.56), (2, 2.5, 0.57), (2.5, 3, 0.58), (3, 3.5, 0.59)]
-                   },
-            0.30: {"base_factor": [(1.5, 2, 0.59), (2, 2.5, 0.57), (2.5, 3, 0.56), (3, 6, 0.55)],
-                   "pie_factor": [(0.5, 1, 0.24), (1, 1.5, 0.25), (1.5, 2, 0.27), (2, 2.5, 0.28), (2.5, 3.5, 0.29)],
-                   "talon_factor": [(0.5, 1, 0.46), (1, 1.5, 0.50), (1.5, 2, 0.56), (2, 2.5, 0.57), (2.5, 3, 0.58), (3, 3.5, 0.59)]
-                   },
-            0.35: {"base_factor": [(1.5, 2, 0.63), (2, 2.5, 0.60), (2.5, 3.5, 0.59), (3.5, 5.5, 0.58), (5.5, 6, 0.57)],
-                   "pie_factor": [(0.5, 1, 0.24), (1, 1.5, 0.25), (1.5, 2, 0.27), (2, 2.5, 0.28), (2.5, 3, 0.29), (3, 3.5, 0.30)],
-                   "talon_factor": [(0.5, 1, 0.46), (1, 1.5, 0.50), (1.5, 2, 0.56), (2, 2.5, 0.57), (2.5, 3, 0.58), (3, 3.5, 0.59)]
-                   },
-        }
-
-        factors_by_aa_inclined = {
-            # (Rangos y factores para inclinación > 0)
-            0.15: {"base_factor": [(1.5, 2, 0.64), (2, 5.5, 0.63), (5.5, 6, 0.62)],
-                   "pie_factor": [(0.5, 1, 0.24), (1, 1.5, 0.25), (1.5, 2, 0.28), (2, 2.5, 0.29), (2.5, 4, 0.30)],
-                   "talon_factor": [(0.5, 1, 0.49), (1, 1.5, 0.50), (1.5, 2, 0.55), (2, 2.5, 0.57), (2.5, 3, 0.58), (3, 3.5, 0.59), (3.5, 4, 0.60)]
-                   },
-            0.20: {"base_factor": [(1.5, 2, 0.7), (2, 2.5, 0.69), (2.5, 3, 0.68), (3, 6, 0.67)],
-                   "pie_factor": [(1, 1.5, 0.26), (1.5, 2, 0.28), (2, 3.5, 0.30), (3.5, 4.5, 0.31)],
-                   "talon_factor": [(1, 1.5, 0.50), (1.5, 2, 0.55), (2, 2.5, 0.57), (2.5, 3, 0.58), (3, 4.5, 0.59)]
-                   },
-            0.25: {"base_factor": [(1.5, 2, 0.76), (2, 2.5, 0.75), (2.5, 4.5, 0.74), (4.5, 6, 0.73)],
-                   "pie_factor": [(1, 1.5, 0.27), (1.5, 2, 0.28), (2, 3.5, 0.30), (3.5, 4.5, 0.31)],
-                   "talon_factor": [(1, 1.5, 0.51), (1.5, 2, 0.55), (2, 2.5, 0.57), (2.5, 3, 0.58), (3, 3.5, 0.59), (3.5, 4.5, 0.60)]
-                   },
-            0.30: {"base_factor": [(1.5, 2, 0.83), (2, 3, 0.82), (3, 3.5, 0.81), (3.5, 6, 0.80)],
-                   "pie_factor": [(1, 1.5, 0.27), (1.5, 2, 0.28), (2, 2.5, 0.29), (2.5, 3.5, 0.30), (3.5, 5, 0.31)],
-                   "talon_factor": [(1, 1.5, 0.53), (1.5, 2, 0.56), (2, 2.5, 0.58), (2.5, 3, 0.59), (3, 4, 0.60), (4, 5, 0.61)]
-                   },
-            0.35: {"base_factor": [(1.5, 2.5, 0.96), (2.5, 3.5, 0.95), (3.5, 6, 0.94)],
-                   "pie_factor": [(1, 1.5, 0.27), (1.5, 2, 0.28), (2, 2.5, 0.29), (2.5, 3, 0.30), (3, 6, 0.31)],
-                   "talon_factor": [(1, 1.5, 0.55), (1.5, 2, 0.56), (2, 2.5, 0.57), (2.5, 3, 0.59), (3, 4, 0.60), (4, 4.5, 0.61), (4.5, 6, 0.62)]
-                   },
-        }
-
+        # Llama a la lógica de cálculo y muestra los resultados en la interfaz.
         try:
-            # Lógica de cálculo usando los valores ingresados
+            # Obtener los valores ingresados por el usuario
             data = {}
             for key, entry in self.entries.items():
                 if isinstance(entry, (tk.Entry, ttk.Combobox)):
@@ -250,98 +201,15 @@ class DesignParameters(tk.Tk):
                     if raw_value == "":
                         raise ValueError(
                             f"El campo '{key}' está vacío. Por favor ingrese un valor.")
-                    # Reemplazar comas con puntos para manejar valores decimales
-                    value = raw_value.replace(",", ".")
+                    value = raw_value.replace(",", ".")  # Manejo de decimales
                     data[key] = value
+                elif isinstance(entry, tk.Label):
+                    data[key] = "420"
                 else:
-                    # Para valores fijos como fy
-                    data[key] = entry
+                    data[key] = entry  # Para valores fijos como fy
 
-            wall_height = float(data.get("wall_height", 0))  # H
-            angle_inclination = float(data.get("angle_inclination", 0))
-            # el valor de fy, resistencia del acero
-            fy = data.get("steel_resistance", 420)
-            aa = float(data.get("aa", 0))
-
-            # Validar ángulo de inclinación del relleno (i)
-            if angle_inclination > 45:
-                raise ValueError(
-                    "El ángulo de inclinación del relleno (i) no puede ser mayor a 45 grados.")
-
-            # Validar la altura del muro
-            if wall_height < 1.5 or wall_height > 6.0:
-                raise ValueError(
-                    "Altura no admitida: Ingrese una altura entre 1.5m y 6m."
-                )
-
-            # Seleccionar el conjunto de factores según el ángulo
-            factors = FACTORS_BY_AA if angle_inclination == 0 else FACTORS_BY_AA_INCLINED
-
-            # Validar que Aa esté en los factores
-            if aa not in factors:
-                raise ValueError(
-                    f"El valor de Aa ({aa}) no es válido o no tiene factores asignados.")
-
-            # Obtener factores para base, pie y talón
-            base_factor = self.get_factor(
-                wall_height, factors[aa]["base_factor"])
-            base_muro = round((wall_height * base_factor), 2)
-
-            pie_factor = self.get_factor(base_muro, factors[aa]["pie_factor"])
-            talon_factor = self.get_factor(
-                base_muro, factors[aa]["talon_factor"])
-
-            pie = round((base_muro * pie_factor), 2)
-            talon = round((base_muro * talon_factor), 2)
-
-            # Cálculo de la base corona (b2min)
-            base_corona = self.get_factor(
-                wall_height,
-                [
-                    (1.5, 3.5, 0.25),
-                    (3.5, 5.5, 0.30),
-                ],
-                default=0.35,
-            )
-
-            # Cálculo de la altura de zapata (d)
-            altura_zapata = (
-                self.get_factor(
-                    wall_height,
-                    [
-                        (1.5, 2, 0.18),
-                        (2, 2.5, 0.14),
-                        (2.5, 3, 0.12),
-                    ],
-                    default=0.11,
-                )
-                * wall_height
-            )
-
-            # Cálculo de la base inferior (b2max)
-            base_abajo = round((base_muro - pie - talon), 2)
-            # Cálculo de la altura de la pantalla (h)
-            altura_pantalla = round((wall_height - altura_zapata), 2)
-            # Cálculo del ángulo de inclinación del vástago (β)
-            inclinacion = round((degrees(
-                atan((base_abajo - base_corona) / altura_pantalla))), 2)
-            # print("inclinacion", base_abajo, base_corona, altura_pantalla)
-
-            # Resultados
-            results = {
-                "Base del muro": base_muro,
-                "Pie": pie,
-                "Talón": talon,
-                "Base corona": base_corona,
-                "Base abajo": base_abajo,
-                "Altura de zapata": altura_zapata,
-                "h": altura_pantalla,
-                "Ángulo de inclinación del Vástago": inclinacion,  # beta_rad
-                "Resistencia del acero (fy)": fy,
-            }
-
-            # Mostrar resultados
-            print(results)
+            # Llamar a la lógica de cálculo
+            results = calculate_design_logic(data)
             Predimensioning(self, results)
 
         except ValueError as e:
