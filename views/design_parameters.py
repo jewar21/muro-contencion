@@ -7,7 +7,14 @@ from math import atan, degrees
 
 from views.predimensioning import Predimensioning
 from models.seismic_data import get_municipality, get_seismic_info
-from models.project_data import CONCRETE_VALUES, FORM_FIELDS
+from models.project_data import (
+    CONCRETE_VALUES,
+    DIENTE_VALUES,
+    TYPE_SOIL_VALUES,
+    FORM_FIELDS,
+    FACTORS_BY_AA,
+    FACTORS_BY_AA_INCLINED
+)
 from controllers.design_logic import calculate_design_logic
 
 
@@ -99,6 +106,14 @@ class DesignParameters(tk.Tk):
                     anchor="w",
                 )
                 self.entries[key] = 420
+            elif key == "diente":
+                widget = ttk.Combobox(
+                    row_frame, state="readonly", values=DIENTE_VALUES, width=12
+                )
+            elif key == "type_soil":
+                widget = ttk.Combobox(
+                    row_frame, state="readonly", values=TYPE_SOIL_VALUES, width=12
+                )
             else:
                 widget = tk.Entry(row_frame, width=15)
             widget.pack(side="left", padx=(0, 5))
@@ -138,27 +153,35 @@ class DesignParameters(tk.Tk):
         """
         location = self.entries["project_location"].get()
         aa_entry = self.entries["aa"]  # Campo de Aa
+        pga_entry = self.entries["pga"]  # Campo de pga
 
         if location == "Otro":
             aa_entry.config(state="normal")  # Habilitar entrada manual
             aa_entry.delete(0, tk.END)  # Limpiar cualquier valor previo
+            pga_entry.config(state="normal")
+            pga_entry.delete(0, tk.END)
         else:
             # Deshabilitar el campo y calcular Aa automáticamente
             # Obtén el valor calculado de Aa
-            aa_value = self.calculate_aa(location)
+            factor_value = self.calculate_factor(location)
             # Habilitar temporalmente para insertar el valor
             aa_entry.config(state="normal")
             aa_entry.delete(0, tk.END)
-            aa_entry.insert(0, aa_value)  # Mostrar el valor calculado
+            # Mostrar el valor calculado
+            aa_entry.insert(0, factor_value["aa"])
             aa_entry.config(state="disabled")  # Bloquear nuevamente el campo
+            # Mostrar el valor calculado
+            pga_entry.insert(0, factor_value["pga"])
+            pga_entry.config(state="disabled")  # Bloquear nuevamente el campo
 
-    def calculate_aa(self, location):
+    def calculate_factor(self, location):
         """
         Calcula el valor de Aa para una ubicación específica y lo devuelve.
         """
         seismic_info = get_seismic_info(location)  # Obtiene los datos sísmicos
         # Retorna Aa o un valor por defecto
-        return seismic_info.get("Aa", "0.0") if seismic_info else "0.0"
+        return {"aa": seismic_info.get("Aa", "0.0") if seismic_info else "0.0",
+                "pga": seismic_info.get("pga", "0.0") if seismic_info else "0.0"}
 
     def get_factor(self, value, ranges, default=0):
         """
@@ -168,7 +191,7 @@ class DesignParameters(tk.Tk):
             if min_val <= value <= max_val:
                 return factor
         return default
-
+    
     def calculate_design(self):
         factors_by_aa = {
             # (Rangos y factores para inclinación 0)
@@ -217,7 +240,7 @@ class DesignParameters(tk.Tk):
                    "talon_factor": [(1, 1.5, 0.55), (1.5, 2, 0.56), (2, 2.5, 0.57), (2.5, 3, 0.59), (3, 4, 0.60), (4, 4.5, 0.61), (4.5, 6, 0.62)]
                    },
         }
-        
+
         try:
             # Lógica de cálculo usando los valores ingresados
             data = {}
@@ -252,7 +275,7 @@ class DesignParameters(tk.Tk):
                 )
 
             # Seleccionar el conjunto de factores según el ángulo
-            factors = factors_by_aa if angle_inclination == 0 else factors_by_aa_inclined
+            factors = FACTORS_BY_AA if angle_inclination == 0 else FACTORS_BY_AA_INCLINED
 
             # Validar que Aa esté en los factores
             if aa not in factors:
@@ -313,7 +336,7 @@ class DesignParameters(tk.Tk):
                 "Base abajo": base_abajo,
                 "Altura de zapata": altura_zapata,
                 "h": altura_pantalla,
-                "Ángulo de inclinación del Vástago": inclinacion,
+                "Ángulo de inclinación del Vástago": inclinacion,  # beta_rad
                 "Resistencia del acero (fy)": fy,
             }
 
