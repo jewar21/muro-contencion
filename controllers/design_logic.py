@@ -76,10 +76,18 @@ def get_factor(value, ranges, default=0):
 def validate_inputs(data):
     # Valida los valores ingresados por el usuario y devuelve un diccionario con valores procesados.
     try:
+        angle_friction = radians(float(data.get("angle_friction", 0)))
+        angle_soil_wall = radians(float(data.get("angle_soil_wall", 0)))
+        unit_weight = float(data.get("unit_weight", 0))
+        soil_bearing_capacity = float(data.get("soil_bearing_capacity", 0))
+        concrete_resistance = float(data.get("concrete_resistance", 0))
         fy = float(data.get("steel_resistance", 420))
         wall_height = float(data.get("wall_height", 0))
         angle_inclination = float(data.get("angle_inclination", 0))
         aa = float(data.get("aa", 0))
+        pga = float(data.get("pga", 0))
+        diente = float(data.get("diente", 0))
+        type_soil = data.get("type_soil")
 
         # Validaciones de los valores de entrada
         if angle_inclination > 45:
@@ -100,7 +108,8 @@ def validate_inputs(data):
         raise ValueError(f"Error en la validación de datos: {e}")
 
 
-def calculate_design_logic(data):
+def calculate_design_logic(select_design, data):
+    print(f"Calculando diseño para: {select_design}")
     """
     Realiza los cálculos de diseño a partir de los datos validados.
     """
@@ -162,8 +171,9 @@ def calculate_design_logic(data):
         # Cálculo de la altura de la pantalla (h)
         altura_pantalla = round((wall_height - altura_zapata), 2)
         # Cálculo del ángulo de inclinación del vástago (β)
-        beta_rad = radians(round((degrees(
-            atan((base_vastago - base_corona) / altura_pantalla))), 2))
+        beta_rad = round((degrees(
+            atan((base_vastago - base_corona) / altura_pantalla))), 2)
+        print("Estos son los datos:_ ",base_vastago, base_corona, altura_pantalla)
 
         # Resultados
         results = {

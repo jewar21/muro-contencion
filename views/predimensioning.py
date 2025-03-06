@@ -16,8 +16,8 @@ class Predimensioning(tk.Toplevel):
         self.geometry(f"{width}x{height}+0+0")
         self.resizable(False, False)
 
-        print("Datos ingresados por el usuario:", self.full_data)
-        print("Resultados de predimensionamiento:", self.input_data)
+        # print("Datos ingresados por el usuario:", self.full_data)
+        # print("Resultados de predimensionamiento:", self.input_data)
 
         # Calcular valores de verificación
         self.verification_results = self.calculate_verification_results()
@@ -54,7 +54,7 @@ class Predimensioning(tk.Toplevel):
         # Tabla Predimensionamiento Calculado
         predimensioning_title = tk.Label(
             right_frame, text="Predimensionamiento Calculado", font=("Arial", 12, "bold"))
-        predimensioning_title.pack(pady=5)
+        predimensioning_title.grid(pady=5)
         self.predimensioning_results = ttk.Treeview(
             right_frame, columns=("parameter", "value", "unit"), show="headings", height=8
         )
@@ -65,12 +65,12 @@ class Predimensioning(tk.Toplevel):
         self.predimensioning_results.column(
             "value", anchor="center", width=100)
         self.predimensioning_results.column("unit", anchor="center", width=80)
-        self.predimensioning_results.pack(pady=10)
+        self.predimensioning_results.grid(pady=10)
 
         # Bloquear redimensionamiento y edición
         self.predimensioning_results["displaycolumns"] = (
             "parameter", "value", "unit")
-        self.predimensioning_results.pack(pady=10)
+        self.predimensioning_results.grid(pady=10)
 
         # Sección para las tres tablas alineadas horizontalmente
         verification_frame = tk.Frame(main_frame)
@@ -101,10 +101,21 @@ class Predimensioning(tk.Toplevel):
             2
         )
 
+        # Sección para los botones
+        buttons_frame = tk.Frame(right_frame)
+        buttons_frame.grid(row=2, column=1, columnspan=2, pady=5)
+
+        # Botón para realizar el diseño
+        btn_calculate = tk.Button(
+            buttons_frame, text="Calcular Vista",
+            command=self.calculate_view
+        )
+        btn_calculate.grid(row=0, column=0, padx=5)
+
         # Botón para cerrar
         close_button = tk.Button(
-            right_frame, text="Cerrar", command=self.destroy)
-        close_button.pack(pady=10)
+            buttons_frame, text="Cerrar", command=self.destroy)
+        close_button.grid(row=0, column=1, padx=5)
 
         # Llenar los datos
         self.calculate_predimensioning_results()
@@ -132,6 +143,10 @@ class Predimensioning(tk.Toplevel):
         except Exception as e:
             messagebox.showerror(
                 "Error", f"Ocurrió un error al llenar los resultados:\n{e}")
+
+    def calculate_view(self):
+        select_design = self.design_button.get()
+        print(f"Calculando diseño para: {select_design}")
 
     def create_verification_table(self, parent, title, columns, table_key, col_position):
         """
@@ -190,17 +205,3 @@ class Predimensioning(tk.Toplevel):
                 ("CAPACIDAD CARGA", "MÁXIMO", "300", "250", "Sí"),
             ],
         }
-
-        # NOTA:
-        #     angle_friction = radians(float(data.get("angle_friction", 0)))
-        #     angle_soil_wall = radians(float(data.get("angle_soil_wall", 0)))
-        #     unit_weight = float(data.get("unit_weight", 0))
-        #     soil_bearing_capacity = float(data.get("soil_bearing_capacity", 0))
-        #     concrete_resistance = float(data.get("concrete_resistance", 0))
-        #     fy = float(data.get("steel_resistance", 420))
-        #     wall_height = float(data.get("wall_height", 0))
-        #     angle_inclination = float(data.get("angle_inclination", 0))
-        #     aa = float(data.get("aa", 0))
-        #     pga = float(data.get("pga", 0))
-        #     diente = float(data.get("diente", 0))
-        #     type_soil = data.get("type_soil")
