@@ -99,10 +99,18 @@ def validate_inputs(data):
                 "Altura no admitida: Ingrese una altura entre 1.5m y 6m.")
 
         return {
+            "angle_friction": angle_friction,
+            "angle_soil_wall": angle_soil_wall,
+            "unit_weight": unit_weight,
+            "soil_bearing_capacity": soil_bearing_capacity,
+            "concrete_resistance": concrete_resistance,
+            "pga": pga,
             "fy": fy,
             "wall_height": wall_height,
             "angle_inclination": angle_inclination,
             "aa": aa,
+            "diente": diente,
+            "type_soil": type_soil,
         }
     except ValueError as e:
         raise ValueError(f"Error en la validación de datos: {e}")
@@ -113,13 +121,21 @@ def calculate_design_logic(select_design, data):
     """
     Realiza los cálculos de diseño a partir de los datos validados.
     """
+
     try:
         validated_data = validate_inputs(data)
-
+        angle_friction = validated_data["angle_friction"]
+        angle_soil_wall = validated_data["angle_soil_wall"]
+        unit_weight = validated_data["unit_weight"]
+        soil_bearing_capacity = validated_data["soil_bearing_capacity"]
+        concrete_resistance = validated_data["concrete_resistance"]
+        pga = validated_data["pga"]
+        fy = validated_data["fy"]
         wall_height = validated_data["wall_height"]
         angle_inclination = validated_data["angle_inclination"]
-        fy = validated_data["fy"]
         aa = validated_data["aa"]
+        diente = validated_data["diente"]
+        type_soil = validated_data["type_soil"]
 
         # Seleccionar el conjunto de factores según el ángulo
         factors = FACTORS_BY_AA if angle_inclination == 0 else FACTORS_BY_AA_INCLINED
@@ -153,7 +169,7 @@ def calculate_design_logic(select_design, data):
         )
 
         # Cálculo de la altura de zapata (d)
-        altura_zapata = (
+        altura_zapata = round((
             get_factor(
                 wall_height,
                 [
@@ -164,7 +180,7 @@ def calculate_design_logic(select_design, data):
                 default=0.11,
             )
             * wall_height
-        )
+        ), 2)
 
         # Cálculo de la base inferior (b2max)
         base_vastago = round((base_muro - pie - talon), 2)
@@ -173,7 +189,18 @@ def calculate_design_logic(select_design, data):
         # Cálculo del ángulo de inclinación del vástago (β)
         beta_rad = round((degrees(
             atan((base_vastago - base_corona) / altura_pantalla))), 2)
-        print("Estos son los datos:_ ",base_vastago, base_corona, altura_pantalla)
+        print("Estos son los datos:_ ", base_vastago,
+              base_corona, altura_pantalla)
+
+        if select_design == "Con inclinación":
+            soil_loads(soil_bearing_capacity)
+            area_barrera, centroide_x_barrera, f = select_barrier(base_corona)
+            weight_wall(base_corona, altura_pantalla, base_vastago, pie, base_muro,
+                        altura_zapata, angle_inclination, area_barrera, centroide_x_barrera)
+        elif select_design == "Sin inclinación - vías":
+            print("Sin inclinación - vías")
+        elif select_design == "Sin inclinación":
+            print("Sin inclinación")
 
         # Resultados
         results = {
@@ -193,3 +220,75 @@ def calculate_design_logic(select_design, data):
 
     except ValueError as e:
         raise ValueError(f"Error en el cálculo: {e}")
+
+
+def soil_loads(soil_bearing_capacity):
+    """Estado limite resistencia 1"""
+
+    capacidad_portante_r1 = round(0.45 * soil_bearing_capacity, 2)
+    print(capacidad_portante_r1)
+
+    """Estado limite evento extremo 1"""
+
+    capacidad_portante_ex1 = round(0.8 * soil_bearing_capacity, 2)
+    print(capacidad_portante_ex1)
+
+    """Estado limite evento extremo 2"""
+
+    capacidad_portante_ex2 = round(0.8 * soil_bearing_capacity, 2)
+    print(capacidad_portante_ex2)
+
+    """Estado límite de servicio"""
+
+    capacidad_portante_s = round(0.65 * soil_bearing_capacity, 2)
+    print(capacidad_portante_s)
+
+
+def select_barrier(base_corona):
+    if base_corona < 0.30:
+        area_barrera = 0.195
+        centroide_x_barrera = 0.13
+        f = 0.87
+    elif base_corona == 0.30:
+        area_barrera = 0.18765
+        centroide_x_barrera = 0.112494
+        f = 0.87
+    else:  # base_corona >= 0.35
+        area_barrera = 0.21
+        centroide_x_barrera = 0.15
+        f = 0.87
+    return area_barrera, centroide_x_barrera, f
+
+
+def weight_wall(base_corona, altura_pantalla, base_vastago, pie, base_muro, altura_zapata, angle_inclination, area_barrera, centroide_x_barrera):
+    print("BASES y ALTURA", base_muro, altura_zapata)
+    DCP1 = round((base_corona * altura_pantalla * 24), 2)
+    print(DCP1)
+    DCX1 = round(pie + (base_corona / 2), 2)
+    print(DCX1)
+
+    DCP2 = round(((base_vastago - base_corona) * altura_pantalla * 24) / 2, 2)
+    print(DCP2)
+    DCX2 = round(pie + base_corona + (base_vastago - base_corona) / 3, 2)
+    print(DCX2)
+
+    DCP3 = round(base_muro * altura_zapata * 24, 2)
+    print(DCP3)
+    DCX3 = round(base_muro / 2, 2)
+    print(DCX3)
+
+    if angle_inclination == 0:
+        DCP4 = round(area_barrera * 24, 2)
+        DCX4 = round(centroide_x_barrera, 2)
+    else:
+        DCP4 = 0
+        DCX4 = 0
+
+    print(DCP4)
+    print(DCX4)
+
+    VDC = round((DCP1 + DCP2 + DCP3 + DCP4), 2)
+    print(VDC)
+
+    MDC = round(DCP1*DCX1 + DCP2*DCX2 + DCP3*DCX3 + DCP4*DCX4, 2)
+    print(MDC)
