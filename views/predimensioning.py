@@ -56,15 +56,20 @@ class Predimensioning(tk.Toplevel):
             right_frame, text="Predimensionamiento Calculado", font=("Arial", 12, "bold"))
         predimensioning_title.pack(pady=5)
         self.predimensioning_results = ttk.Treeview(
-            right_frame, columns=("name", "value", "unit"), show="headings", height=8
+            right_frame, columns=("parameter", "value", "unit"), show="headings", height=8
         )
-        self.predimensioning_results.heading("name", text="Parámetro")
+        self.predimensioning_results.heading("parameter", text="Parámetro")
         self.predimensioning_results.heading("value", text="Valor")
         self.predimensioning_results.heading("unit", text="Unidad")
-        self.predimensioning_results.column("name", anchor="w", width=200)
+        self.predimensioning_results.column("parameter", anchor="w", width=200)
         self.predimensioning_results.column(
             "value", anchor="center", width=100)
         self.predimensioning_results.column("unit", anchor="center", width=80)
+        self.predimensioning_results.pack(pady=10)
+
+        # Bloquear redimensionamiento y edición
+        self.predimensioning_results["displaycolumns"] = (
+            "parameter", "value", "unit")
         self.predimensioning_results.pack(pady=10)
 
         # Sección para las tres tablas alineadas horizontalmente
@@ -72,20 +77,29 @@ class Predimensioning(tk.Toplevel):
         verification_frame.grid(row=1, column=0, columnspan=2, pady=10)
 
         # Crear las tres tablas de verificación en horizontal
-        table1_frame = tk.Frame(verification_frame)
-        table1_frame.grid(row=0, column=0, padx=10)
         self.create_verification_table(
-            table1_frame, "ESTABILIDAD AL DESLIZAMIENTO", "deslizamiento")
+            verification_frame,
+            "VERIFICACIÓN DE LA ESTABILIDAD AL DESLIZAMIENTO DEL MURO",
+            ("ESTADO LÍMITE", "CASO", "FX (KN)", "RR (KN)", "CUMPLE"),
+            "deslizamiento",
+            0
+        )
 
-        table2_frame = tk.Frame(verification_frame)
-        table2_frame.grid(row=0, column=1, padx=10)
         self.create_verification_table(
-            table2_frame, "ESTABILIDAD AL VOLCAMIENTO", "volcamiento")
+            verification_frame,
+            "VERIFICACIÓN DE LA ESTABILIDAD AL VOLCAMIENTO DEL MURO",
+            ("ESTADO LÍMITE", "CASO", "e (m)", "eₘₐₓ (m)", "CUMPLE"),
+            "volcamiento",
+            1
+        )
 
-        table3_frame = tk.Frame(verification_frame)
-        table3_frame.grid(row=0, column=2, padx=10)
         self.create_verification_table(
-            table3_frame, "CAPACIDAD DE CARGA", "carga")
+            verification_frame,
+            "ESFUERZO ÚLTIMO ACTUANTE SOBRE SUELO NO ROCOSO",
+            ("ESTADO LÍMITE", "CASO", "σᵥ (KN/m²)", "σₘₐₓ (KN/m²)", "CUMPLE"),
+            "presion",
+            2
+        )
 
         # Botón para cerrar
         close_button = tk.Button(
@@ -119,33 +133,26 @@ class Predimensioning(tk.Toplevel):
             messagebox.showerror(
                 "Error", f"Ocurrió un error al llenar los resultados:\n{e}")
 
-    def create_verification_table(self, parent, title, table_key):
+    def create_verification_table(self, parent, title, columns, table_key, col_position):
         """
         Crea una tabla de verificación con los valores calculados.
         """
         frame = tk.Frame(parent)
-        frame.pack(fill="x", pady=5)
+        frame.grid(row=0, column=col_position, pady=5)
 
         # Título de la tabla
         table_title = tk.Label(frame, text=title, font=(
             "Arial", 10, "bold"), anchor="w")
         table_title.pack(fill="x")
 
-        # Crear tabla Treeview
-        table = ttk.Treeview(frame, columns=(
-            "state_limit", "case", "fx", "rr", "pass"), show="headings", height=7)
-        table.heading("state_limit", text="ESTADO LÍMITE")
-        table.heading("case", text="CASO")
-        table.heading("fx", text="FX")
-        table.heading("rr", text="RR")
-        table.heading("pass", text="CUMPLE")
+        # Crear tabla
+        table = ttk.Treeview(frame, columns=columns, show="headings", height=7)
+        for col in columns:
+            table.heading(col, text=col)
+            table.column(col, anchor="center", width=100)
 
-        table.column("state_limit", anchor="w", width=150)
-        table.column("case", anchor="center", width=80)
-        table.column("fx", anchor="center", width=80)
-        table.column("rr", anchor="center", width=80)
-        table.column("pass", anchor="center", width=80)
-
+        # Bloquear redimensionamiento y edición
+        table["displaycolumns"] = columns
         table.pack(fill="x", padx=5, pady=5)
 
         # Llenar la tabla con los valores calculados
@@ -167,10 +174,13 @@ class Predimensioning(tk.Toplevel):
         # Simulación de cálculos para las tablas
         return {
             "deslizamiento": [
-                ("RESISTENCIA 1", "MÁXIMO", "100", "80", "Sí"),
-                ("", "MÍNIMO", "90", "85", "Sí"),
-                ("EVENTO EXTREMO I", "MÁXIMO", "85", "70", "No"),
-                ("", "MÍNIMO", "80", "75", "Sí"),
+                ("RESISTENCIA 1", "MÁXIMO", "100", "80", "SÍ"),
+                ("", "MÍNIMO", "90", "85", "SÍ"),
+                ("EVENTO EXTREMO I", "MÁXIMO", "85", "70", "NO"),
+                ("", "MÍNIMO", "80", "75", "SÍ"),
+                ("EVENTO EXTREMO II", "MÁXIMO", "85", "70", "NO"),
+                ("", "MÍNIMO", "80", "75", "SÍ"),
+                ("SERVICIO 1", "", "100", "80", "SÍ"),
             ],
             "volcamiento": [
                 ("RESISTENCIA 1", "MÁXIMO", "200", "150", "Sí"),
