@@ -1,5 +1,7 @@
 from tkinter import ttk, messagebox
-from math import atan, degrees, radians
+from math import atan, degrees, radians, tan, sqrt, sin, cos
+
+import numpy as np
 
 from models.project_data import (
     FACTORS_BY_AA,
@@ -195,8 +197,16 @@ def calculate_design_logic(select_design, data):
         if select_design == "Con inclinación":
             soil_loads(soil_bearing_capacity)
             area_barrera, centroide_x_barrera, f = select_barrier(base_corona)
-            weight_wall(base_corona, altura_pantalla, base_vastago, pie, base_muro,
-                        altura_zapata, angle_inclination, area_barrera, centroide_x_barrera)
+            vdc, mdc = weight_wall(base_corona, altura_pantalla, base_vastago, pie, base_muro,
+                                   altura_zapata, angle_inclination, area_barrera, centroide_x_barrera)
+            vev, mev = weight_soil(base_vastago, base_corona, altura_pantalla,
+                                   unit_weight, pie, talon, angle_inclination)
+            ka, kp, total_height, Horizontal_component, meho = Active_and_passive_thrust(angle_friction, beta_rad, angle_soil_wall,
+                                                                                         angle_inclination, base_vastago, base_corona,
+                                                                                         talon, wall_height, unit_weight, altura_zapata, diente)
+            fpga = f_pga(type_soil, pga)
+            seismic_thrust(pga, angle_soil_wall, angle_friction, angle_inclination,
+                           beta_rad, unit_weight, total_height, vdc, vev, Horizontal_component, fpga)
         elif select_design == "Sin inclinación - vías":
             print("Sin inclinación - vías")
         elif select_design == "Sin inclinación":
@@ -263,19 +273,19 @@ def select_barrier(base_corona):
 def weight_wall(base_corona, altura_pantalla, base_vastago, pie, base_muro, altura_zapata, angle_inclination, area_barrera, centroide_x_barrera):
     print("BASES y ALTURA", base_muro, altura_zapata)
     DCP1 = round((base_corona * altura_pantalla * 24), 2)
-    print(DCP1)
+    # print(DCP1)
     DCX1 = round(pie + (base_corona / 2), 2)
-    print(DCX1)
+    # print(DCX1)
 
     DCP2 = round(((base_vastago - base_corona) * altura_pantalla * 24) / 2, 2)
-    print(DCP2)
+    # print(DCP2)
     DCX2 = round(pie + base_corona + (base_vastago - base_corona) / 3, 2)
-    print(DCX2)
+    # print(DCX2)
 
     DCP3 = round(base_muro * altura_zapata * 24, 2)
-    print(DCP3)
+    # print(DCP3)
     DCX3 = round(base_muro / 2, 2)
-    print(DCX3)
+    # print(DCX3)
 
     if angle_inclination == 0:
         DCP4 = round(area_barrera * 24, 2)
@@ -284,11 +294,212 @@ def weight_wall(base_corona, altura_pantalla, base_vastago, pie, base_muro, altu
         DCP4 = 0
         DCX4 = 0
 
-    print(DCP4)
-    print(DCX4)
+    # print(DCP4)
+    # print(DCX4)
 
-    VDC = round((DCP1 + DCP2 + DCP3 + DCP4), 2)
-    print(VDC)
+    vdc = round((DCP1 + DCP2 + DCP3 + DCP4), 2)
+    # print(VDC)
 
-    MDC = round(DCP1*DCX1 + DCP2*DCX2 + DCP3*DCX3 + DCP4*DCX4, 2)
-    print(MDC)
+    mdc = round(DCP1*DCX1 + DCP2*DCX2 + DCP3*DCX3 + DCP4*DCX4, 2)
+    # print(MDC)
+    return {vdc, mdc}
+
+
+def weight_soil(base_vastago, base_corona, altura_pantalla, unit_weight, pie, talon, angle_inclination):
+    print("SUELO")
+    EVP5 = round(((base_vastago - base_corona) *
+                 altura_pantalla * unit_weight * 10) / 2, 2)
+    # print(EVP5)
+    EVX5 = round(pie + base_corona + (2 * (base_vastago - base_corona) / 3), 2)
+    # print(EVX5)
+
+    EVP6 = round(talon * altura_pantalla * unit_weight * 10, 2)
+    # print(EVP6)
+    EVX6 = round(pie + base_vastago + (talon / 2), 2)
+    # print(EVX6)
+
+    EVP7 = round(((base_vastago - base_corona + talon) * (tan(radians(angle_inclination))
+                 * (base_vastago - base_corona + talon)) * unit_weight * 10) / 2, 2)
+    # print(base_vastago, base_corona, talon, angle_inclination, unit_weight)
+
+    # print(EVP7)
+    EVX7 = round(pie + base_corona +
+                 (2 * (base_vastago - base_corona + talon) / 3), 2)
+    # print(EVX7)
+
+    vev = round((EVP5 + EVP6 + EVP7), 2)
+    # print(VEV)
+
+    mev = round((EVP5 * EVX5 + EVP6 * EVX6 + EVP7 * EVX7), 2)
+    # print(MEV)
+    return {vev, mev}
+
+
+def Active_and_passive_thrust(angle_friction, beta_rad, angle_soil_wall, angle_inclination, base_vastago, base_corona, talon, wall_height, unit_weight, altura_zapata, diente):
+    print("EMPUJE ACT Y PAS")
+    "2.4.1 Empuje activo y pasivo del relleno (EH)"
+    # Caso i = 0
+    ka1 = round(((tan(radians(45) - (angle_friction / 2))) ** 2), 2)
+    # print(ka1)
+
+    # Caso i > 0
+    numerador = (cos(angle_friction - radians(beta_rad))) ** 2
+    # print(numerador)
+    denominador = cos(radians(beta_rad)) ** 2 * \
+        cos(angle_soil_wall + radians(beta_rad))
+    # print(denominador)
+    raiz = sqrt((sin(angle_soil_wall + angle_friction) * sin(angle_friction - radians(angle_inclination))) /
+                (cos(angle_soil_wall - radians(beta_rad)) * cos(radians(angle_inclination) - radians(beta_rad))))
+    # print(raiz)
+    ka2 = round((numerador / (denominador * (1 + raiz))), 2)
+    # print(ka2)
+
+    if angle_inclination == 0:
+        ka = ka1
+    else:
+        ka = ka2
+    # print(ka)
+
+    """Coeficiente Pasivo"""
+
+    kp = round(((tan(radians(45) + (angle_friction / 2))) ** 2), 2)
+    # print(kp)
+
+    """Empuje Activo estatico"""
+
+    # Calculo altura
+    h2 = (tan(radians(angle_inclination))) * \
+        (base_vastago - base_corona + talon)
+    total_height = round((wall_height + h2), 2)
+    # print(total_height)
+
+    # Empuje activo
+    active_thrust = round(
+        ((1 / 2) * ka * (unit_weight * 10) * ((total_height) ** 2)), 2)
+    # print(active_thrust)
+
+    # NOTE: Eliminar # Componente vertical
+    # vertical_component = round(
+    #     (active_thrust * sin(angle_soil_wall + radians(beta_rad))), 2)
+    # # print(vertical_component)
+
+    # Componente horizontal
+    Horizontal_component = round(
+        (active_thrust * cos(angle_soil_wall + radians(beta_rad))), 2)
+    # print(Horizontal_component)
+
+    # centroide y
+    yEH = round((total_height / 3), 2)
+    # print(yEH)
+
+    # Momento en el punto O
+    meho = round((Horizontal_component * yEH), 2)
+    # print(MEHO)
+
+    """Empuje pasivo"""
+
+    passive_thrust = round(
+        ((1 / 2) * kp * (unit_weight * 10) * ((altura_zapata + diente) ** 2)), 2)
+    # print(passive_thrust)
+
+    return {ka, kp, total_height, Horizontal_component, meho}
+
+
+def f_pga(type_soil, pga):
+    print("--- FPGA ---")
+    # Definimos los valores de la tabla
+    tabla = {
+        "C": [1.2, 1.2, 1.2, 1.1, 1.1, 1.0],
+        "D": [1.6, 1.4, 1.2, 1.1, 1.0, 0.9]
+    }
+
+    PGA_valores = [0.1, 0.2, 0.3, 0.4, 0.5, 0.55]  # Valores en la tabla
+
+    if type_soil not in tabla:
+        raise ValueError("Tipo de suelo no válido. Debe ser 'C' o 'D'.")
+
+    F_PGA_valores = tabla[type_soil]  # Obtiene la fila correspondiente
+
+    # Si PGA está exactamente en la tabla, devolvemos el valor correspondiente
+    if pga in PGA_valores:
+        print(F_PGA_valores[PGA_valores.index(pga)])
+        return F_PGA_valores[PGA_valores.index(pga)]
+
+    # Si no está, hacemos interpolación lineal
+    print(np.interp(pga, PGA_valores, F_PGA_valores))
+    return np.interp(pga, PGA_valores, F_PGA_valores)
+
+
+def seismic_thrust(pga, angle_soil_wall, angle_friction, angle_inclination, beta_rad, unit_weight, total_height, vdc, vev, Horizontal_component, fpga):
+    """Coeficiente sismico suponiendo que no hay deslizamiento del muro"""
+    print("SISMO")
+    # El valor de 1.0 debe calcularse dependiendo del type_soil y PGA
+    kho = round((pga * fpga), 2)
+
+    print(kho)
+
+    """Coeficiente sismico horizontal"""
+
+    kh = round((kho * 0.5), 2)
+    _1 = radians(kh)
+    print(_1)
+    print(kh)
+
+    """Coeficiente de empuje dinamico activo"""
+
+    Ɵ = (atan(kh))
+
+    theta_degrees = degrees(Ɵ)
+    print(Ɵ)
+    print(theta_degrees)
+
+    numerador2 = sin(angle_soil_wall + angle_friction) * \
+        sin(angle_friction - Ɵ - radians(angle_inclination))
+    denominador2 = cos(angle_soil_wall + radians(beta_rad) + Ɵ) * \
+        cos(angle_inclination - radians(beta_rad))
+    raiz2 = sqrt(numerador2 / denominador2)
+    Ψ = round(((1 + raiz2) ** 2), 2)
+    print(Ψ)
+
+    """Coeficiente Empuje dinamico activo"""
+
+    numerador3 = cos(angle_friction - Ɵ - radians(beta_rad)) ** 2
+    denominador3 = Ψ * cos(Ɵ) * cos(radians(beta_rad)) * \
+        cos(angle_soil_wall + radians(beta_rad) + Ɵ)
+    dynamic_active_coefficient = round((numerador3 / denominador3), 2)
+    print(dynamic_active_coefficient)
+
+    """Empuje dinamico activo"""
+
+    active_dynamic_thrust = round(
+        ((1 / 2) * unit_weight * 10 * dynamic_active_coefficient * (total_height ** 2)), 2)
+    print(active_dynamic_thrust)
+
+    """Diferencia de empujes"""
+
+    thrust_difference = round(
+        (active_dynamic_thrust - Horizontal_component), 2)
+    print(thrust_difference)
+
+    """Calculo de l fuerza PIR"""
+
+    PIR = round(kh * (vdc + vev), 2)
+    print(PIR)
+
+    """CombinaciÓn mas desfavorable PSEIS"""
+
+    PSEIS1 = round(thrust_difference + 0.5 * PIR, 2)
+    print(PSEIS1)
+    PSEIS2 = round(0.5 * thrust_difference + PIR, 2)
+    print(PSEIS2)
+
+    PSEIS = round(max(PSEIS1, PSEIS2), 2)
+    print(PSEIS)
+
+    # El mayor de los dos
+
+    yPIR = round(total_height * 0.4, 2)
+    print(yPIR)
+
+    MPSEIS = round(PSEIS * yPIR, 2)
+    print(MPSEIS)
