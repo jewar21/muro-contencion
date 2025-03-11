@@ -267,7 +267,7 @@ def select_barrier(base_corona):
         area_barrera = 0.21
         centroide_x_barrera = 0.15
         f = 0.87
-    return area_barrera, centroide_x_barrera, f
+    return (area_barrera, centroide_x_barrera, f)
 
 
 def weight_wall(base_corona, altura_pantalla, base_vastago, pie, base_muro, altura_zapata, angle_inclination, area_barrera, centroide_x_barrera):
@@ -302,7 +302,7 @@ def weight_wall(base_corona, altura_pantalla, base_vastago, pie, base_muro, altu
 
     mdc = round(DCP1*DCX1 + DCP2*DCX2 + DCP3*DCX3 + DCP4*DCX4, 2)
     # print(MDC)
-    return {vdc, mdc}
+    return (vdc, mdc)
 
 
 def weight_soil(base_vastago, base_corona, altura_pantalla, unit_weight, pie, talon, angle_inclination):
@@ -332,7 +332,7 @@ def weight_soil(base_vastago, base_corona, altura_pantalla, unit_weight, pie, ta
 
     mev = round((EVP5 * EVX5 + EVP6 * EVX6 + EVP7 * EVX7), 2)
     # print(MEV)
-    return {vev, mev}
+    return (vev, mev)
 
 
 def Active_and_passive_thrust(angle_friction, beta_rad, angle_soil_wall, angle_inclination, base_vastago, base_corona, talon, wall_height, unit_weight, altura_zapata, diente):
@@ -371,7 +371,7 @@ def Active_and_passive_thrust(angle_friction, beta_rad, angle_soil_wall, angle_i
     h2 = (tan(radians(angle_inclination))) * \
         (base_vastago - base_corona + talon)
     total_height = round((wall_height + h2), 2)
-    # print(total_height)
+    print("TOTAL HEIGHT CALCULADO", total_height)
 
     # Empuje activo
     active_thrust = round(
@@ -402,7 +402,7 @@ def Active_and_passive_thrust(angle_friction, beta_rad, angle_soil_wall, angle_i
         ((1 / 2) * kp * (unit_weight * 10) * ((altura_zapata + diente) ** 2)), 2)
     # print(passive_thrust)
 
-    return {ka, kp, total_height, Horizontal_component, meho}
+    return (ka, kp, total_height, Horizontal_component, meho)
 
 
 def f_pga(type_soil, pga):
@@ -470,7 +470,7 @@ def seismic_thrust(pga, angle_soil_wall, angle_friction, angle_inclination, beta
     print(dynamic_active_coefficient)
 
     """Empuje dinamico activo"""
-
+    print("TOTAL HEIGHT --->", total_height)
     active_dynamic_thrust = round(
         ((1 / 2) * unit_weight * 10 * dynamic_active_coefficient * (total_height ** 2)), 2)
     print(active_dynamic_thrust)
