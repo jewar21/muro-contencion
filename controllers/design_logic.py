@@ -201,12 +201,26 @@ def calculate_design_logic(select_design, data):
                                    altura_zapata, angle_inclination, area_barrera, centroide_x_barrera)
             vev, mev = weight_soil(base_vastago, base_corona, altura_pantalla,
                                    unit_weight, pie, talon, angle_inclination)
-            ka, kp, total_height, Horizontal_component, meho = Active_and_passive_thrust(angle_friction, beta_rad, angle_soil_wall,
-                                                                                         angle_inclination, base_vastago, base_corona,
-                                                                                         talon, wall_height, unit_weight, altura_zapata, diente)
+            ka, kp, total_height, Horizontal_component, meho, passive_thrust = Active_and_passive_thrust(angle_friction, beta_rad, angle_soil_wall,
+                                                                                                         angle_inclination, base_vastago, base_corona,
+                                                                                                         talon, wall_height, unit_weight, altura_zapata, diente)
             fpga = f_pga(type_soil, pga)
-            seismic_thrust(pga, angle_soil_wall, angle_friction, angle_inclination,
-                           beta_rad, unit_weight, total_height, vdc, vev, Horizontal_component, fpga)
+            pseis, mpseis = seismic_thrust(pga, angle_soil_wall, angle_friction, angle_inclination,
+                                           beta_rad, unit_weight, total_height, vdc, vev, Horizontal_component, fpga)
+            ls, mls = live_load(
+                ka, unit_weight, angle_inclination, wall_height)
+            vct, mct = barrier_collision(angle_inclination, wall_height, f)
+            fvr1cmax, fvr1cmin, fvex1cmax, fvex1cmin, fvex2cmax, fvex2cmin, fvs = vertical_forces(
+                vdc, vev)
+            fhr1cmax, fhr1cmin, fhex1cmax, fhex1cmin, fhex2cmax, fhex2cmin, fhs = horizontal_forces(
+                ls, pseis, Horizontal_component, vct)
+            mvr1cmax, mvr1cmin, mvex1cmax, mvex1cmin, mvex2cmax, mvex2cmin, mvs = horizontal_moments(
+                mdc, mev)
+            mhr1cmax, mhr1cmin, mhex1cmax, mhex1cmin, mhex2cmax, mhex2cmin, mhs = vertical_moments(
+                mls, meho, mpseis, mct)
+            slip_verification(angle_friction, passive_thrust, fvr1cmax, fvr1cmin, fvex1cmax, fvex1cmin,
+                              fvex2cmax, fvex2cmin, fvs, fhr1cmax, fhr1cmin, fhex1cmax, fhex1cmin, fhex2cmax, fhex2cmin, fhs)
+            
         elif select_design == "Sin inclinación - vías":
             print("Sin inclinación - vías")
         elif select_design == "Sin inclinación":
@@ -436,22 +450,14 @@ def seismic_thrust(pga, angle_soil_wall, angle_friction, angle_inclination, beta
     # El valor de 1.0 debe calcularse dependiendo del type_soil y PGA
     kho = round((pga * fpga), 2)
 
-    print(kho)
-
     """Coeficiente sismico horizontal"""
 
     kh = round((kho * 0.5), 2)
     _1 = radians(kh)
-    print(_1)
-    print(kh)
 
     """Coeficiente de empuje dinamico activo"""
 
     Ɵ = (atan(kh))
-
-    theta_degrees = degrees(Ɵ)
-    print(Ɵ)
-    print(theta_degrees)
 
     numerador2 = sin(angle_soil_wall + angle_friction) * \
         sin(angle_friction - Ɵ - radians(angle_inclination))
@@ -459,7 +465,6 @@ def seismic_thrust(pga, angle_soil_wall, angle_friction, angle_inclination, beta
         cos(angle_inclination - radians(beta_rad))
     raiz2 = sqrt(numerador2 / denominador2)
     Ψ = round(((1 + raiz2) ** 2), 2)
-    print(Ψ)
 
     """Coeficiente Empuje dinamico activo"""
 
@@ -467,39 +472,279 @@ def seismic_thrust(pga, angle_soil_wall, angle_friction, angle_inclination, beta
     denominador3 = Ψ * cos(Ɵ) * cos(radians(beta_rad)) * \
         cos(angle_soil_wall + radians(beta_rad) + Ɵ)
     dynamic_active_coefficient = round((numerador3 / denominador3), 2)
-    print(dynamic_active_coefficient)
 
     """Empuje dinamico activo"""
     print("TOTAL HEIGHT --->", total_height)
     active_dynamic_thrust = round(
         ((1 / 2) * unit_weight * 10 * dynamic_active_coefficient * (total_height ** 2)), 2)
-    print(active_dynamic_thrust)
 
     """Diferencia de empujes"""
 
     thrust_difference = round(
         (active_dynamic_thrust - Horizontal_component), 2)
-    print(thrust_difference)
 
     """Calculo de l fuerza PIR"""
 
-    PIR = round(kh * (vdc + vev), 2)
-    print(PIR)
+    pir = round(kh * (vdc + vev), 2)
 
     """CombinaciÓn mas desfavorable PSEIS"""
 
-    PSEIS1 = round(thrust_difference + 0.5 * PIR, 2)
-    print(PSEIS1)
-    PSEIS2 = round(0.5 * thrust_difference + PIR, 2)
-    print(PSEIS2)
+    pseis1 = round(thrust_difference + 0.5 * pir, 2)
+    pseis2 = round(0.5 * thrust_difference + pir, 2)
 
-    PSEIS = round(max(PSEIS1, PSEIS2), 2)
-    print(PSEIS)
+    pseis = round(max(pseis1, pseis2), 2)
 
     # El mayor de los dos
 
     yPIR = round(total_height * 0.4, 2)
-    print(yPIR)
 
-    MPSEIS = round(PSEIS * yPIR, 2)
-    print(MPSEIS)
+    mpseis = round(pseis * yPIR, 2)
+    print(pseis, mpseis)
+
+    return (pseis, mpseis)
+
+
+def live_load(ka, unit_weight, angle_inclination, wall_height):
+    print("""# 2.4.3 sobrecarga por carga viva (LS)""")
+
+    heq = 0.6
+    delta_p = (ka * (unit_weight * 9.806) * heq * 100 * ((10) ** (-3)))
+    print(delta_p)
+
+    if angle_inclination == 0:
+        ls = round(wall_height * delta_p, 2)
+    else:
+        ls = 0
+
+    yLS = round(wall_height / 2, 2)
+    print(yLS)
+
+    mls = round(ls * yLS, 2)
+    print(ls, mls)
+    return (ls, mls)
+
+
+def barrier_collision(angle_inclination, wall_height, f):
+    print("""# 2.4.4 Fuerza de colisión CT sobre la barrera""")
+    """# 2.4.4 Fuerza de colisión CT sobre la barrera"""
+
+    fhb = 240
+    lifh = 1.07
+
+    if angle_inclination == 0:
+        vct = round(fhb / (lifh + wall_height + f), 2)
+    else:
+        vct = 0
+
+    yct = round(0.81 + wall_height, 2)
+
+    mct = round(vct * yct, 2)
+    print(vct, mct)
+    return (vct, mct)
+
+
+def vertical_forces(vdc, vev):
+    # print("""# FUERZAS VERTICALES DC+EV""")
+    """# FUERZAS VERTICALES DC+EV"""
+
+    fvr1cmax = round(1.25 * vdc + 1.35 * vev, 2)
+    fvr1cmin = round(0.9 * vdc + vev, 2)
+    fvex1cmax = round(1.25 * vdc + 1.35 * vev, 2)
+    fvex1cmin = round(0.9 * vdc + vev, 2)
+    fvex2cmax = round(1.25 * vdc + 1.35 * vev, 2)
+    fvex2cmin = round(0.9 * vdc + vev, 2)
+    fvs = round(1 * vdc + 1 * vev, 2)
+    print(fvr1cmax, fvr1cmin, fvex1cmax, fvex1cmin, fvex2cmax, fvex2cmin, fvs)
+
+    return (fvr1cmax, fvr1cmin, fvex1cmax, fvex1cmin, fvex2cmax, fvex2cmin, fvs)
+
+
+def horizontal_forces(ls, pseis, Horizontal_component, vct):
+    # print("""# FUERZAS HORIZONTALES EH+LS, CT, EQ""")
+    """# FUERZAS HORIZONTALES EH+LS, CT, EQ"""
+
+    fhr1cmax = round(1.75 * ls + 1.5 * Horizontal_component, 2)
+    fhr1cmin = round(1.75 * ls + 0.9 * Horizontal_component, 2)
+    fhex1cmax = round(0.5 * ls + 1.5 * Horizontal_component + 1 * pseis, 2)
+    fhex1cmin = round(0.5 * ls + 0.9 * Horizontal_component + 1 * pseis, 2)
+    fhex2cmax = round(0.5 * ls + 1.5 * Horizontal_component + 1 * vct, 2)
+    fhex2cmin = round(0.5 * ls + 0.9 * Horizontal_component + 1 * vct, 2)
+    fhs = round(1 * ls + 1 * Horizontal_component, 2)
+    print(fhr1cmax, fhr1cmin, fhex1cmax, fhex1cmin, fhex2cmax, fhex2cmin, fhs)
+
+    return (fhr1cmax, fhr1cmin, fhex1cmax, fhex1cmin, fhex2cmax, fhex2cmin, fhs)
+
+
+def horizontal_moments(mdc, mev):
+    print("# MOMENTOS DC+EV")
+    """# MOMENTOS DC+EV"""
+
+    mvr1cmax = round(1.25 * mdc + 1.35 * mev, 2)
+    mvr1cmin = round(0.9 * mdc + mev, 2)
+    mvex1cmax = round(1.25 * mdc + 1.35 * mev, 2)
+    mvex1cmin = round(0.9 * mdc + mev, 2)
+    mvex2cmax = round(1.25 * mdc + 1.35 * mev, 2)
+    mvex2cmin = round(0.9 * mdc + mev, 2)
+    mvs = round(1 * mdc + 1 * mev, 2)
+    print(mvr1cmax, mvr1cmin, mvex1cmax, mvex1cmin, mvex2cmax, mvex2cmin, mvs)
+
+    return (mvr1cmax, mvr1cmin, mvex1cmax, mvex1cmin, mvex2cmax, mvex2cmin, mvs)
+
+
+def vertical_moments(mls, meho, mpseis, mct):
+
+    print("# MOMENTOS DC+EV")
+    """# MOMENTOS MH EH+LS Y CT"""
+
+    mhr1cmax = round(1.75 * mls + 1.5 * meho, 2)
+    mhr1cmin = round(1.75 * mls + 0.9 * meho, 2)
+    mhex1cmax = round(0.5 * mls + 1.5 * meho + 1 * mpseis, 2)
+    mhex1cmin = round(0.5 * mls + 0.9 * meho + 1 * mpseis, 2)
+    mhex2cmax = round(0.5 * mls + 1.5 * meho + 1 * mct, 2)
+    mhex2cmin = round(0.5 * mls + 0.9 * meho + 1 * mct, 2)
+    mhs = round(1 * mls + 1 * meho, 2)
+
+    print(mhr1cmax, mhr1cmin, mhex1cmax, mhex1cmin, mhex2cmax, mhex2cmin, mhs)
+
+    return (mhr1cmax, mhr1cmin, mhex1cmax, mhex1cmin, mhex2cmax, mhex2cmin, mhs)
+
+
+def slip_verification(angle_friction, passive_thrust, fvr1cmax, fvr1cmin, fvex1cmax, fvex1cmin, fvex2cmax, fvex2cmin, fvs, fhr1cmax, fhr1cmin, fhex1cmax, fhex1cmin, fhex2cmax, fhex2cmin, fhs):
+    print("""# VERIFICACION  DE LA ESTABILIDAD AL DESLIZAMIENTO DEL MURO""")
+    """# VERIFICACION  DE LA ESTABILIDAD AL DESLIZAMIENTO DEL MURO"""
+
+    RRR1CMAX = round(0.8 * tan(angle_friction) *
+                     fvr1cmax + 0.5 * passive_thrust, 2)
+
+    if fhr1cmax < RRR1CMAX:
+        print("Cumple")
+    else:
+        print("No cumple")
+
+    RRR1CMIN = round(0.8 * tan(angle_friction) *
+                     fvr1cmin + 0.5 * passive_thrust, 2)
+
+    if fhr1cmin < RRR1CMIN:
+        print("Cumple")
+    else:
+        print("No cumple")
+
+    RREX1CMAX = round(0.8 * tan(angle_friction) *
+                      fvex1cmax + 0.5 * passive_thrust, 2)
+
+    if fhex1cmax < RREX1CMAX:
+        print("Cumple")
+    else:
+        print("No cumple")
+
+    RREX1CMIN = round(0.8 * tan(angle_friction) *
+                      fvex1cmin + 0.5 * passive_thrust, 2)
+    print(RREX1CMIN)
+
+    if fhex1cmin < RREX1CMIN:
+        print("Cumple")
+    else:
+        print("No cumple")
+
+    RREX2CMAX = round(0.8 * tan(angle_friction) *
+                      fvex2cmax + 0.5 * passive_thrust, 2)
+
+    if fhex2cmax < RREX2CMAX:
+        print("Cumple")
+    else:
+        print("No cumple")
+
+    RREXC2MIN = round(0.8 * tan(angle_friction) *
+                      fvex2cmin + 0.5 * passive_thrust, 2)
+
+    if fhex2cmin < RREXC2MIN:
+        print("Cumple")
+    else:
+        print("No cumple")
+
+    RRS = round(0.8 * tan(angle_friction) * fvs + 0.5 * passive_thrust, 2)
+
+    if fhs < RRS:
+        print("Cumple")
+    else:
+        print("No cumple")
+
+
+def rollover_verification(base_muro, mvr1cmax, mhr1cmax, fvr1cmax, mvr1cmin, mhr1cmin, fvr1cmin, mvex1cmax, mhex1cmax, fvex1cmax, mvex1cmin, mhex1cmin, fvex1cmin, mvex2cmax, mhex2cmax, fvex2cmax, mvex2cmin, mhex2cmin, fvex2cmin, mvs, mhs, fvs):
+    print("""# VERIFICACION  DE LA ESTABILIDAD AL VOLCAMIENTO DEL MURO""")
+    """# VERIFICACION  DE LA ESTABILIDAD AL VOLCAMIENTO DEL MURO"""
+
+    eMAX = round((base_muro / 3), 2)
+    print(eMAX)
+
+    dR1CMAX = round((mvr1cmax - mhr1cmax) / fvr1cmax, 2)
+    print(dR1CMAX)
+    er1cmax = round((base_muro / 2) - dR1CMAX, 2)
+    print(er1cmax)
+
+    if eMAX > er1cmax:
+        print("Cumple")
+    else:
+        print("No cumple")
+
+    dR1CMIN = round((mvr1cmin - mhr1cmin) / fvr1cmin, 2)
+    print(dR1CMIN)
+    eR1CMIN = round((base_muro / 2) - dR1CMIN, 2)
+    print(eR1CMIN)
+
+    if eMAX > eR1CMIN:
+        print("Cumple")
+    else:
+        print("No cumple")
+
+    dEX1CMAX = round((mvex1cmax - mhex1cmax) / fvex1cmax, 2)
+    print(dEX1CMAX)
+    eEX1CMAX = round((base_muro / 2) - dEX1CMAX, 2)
+    print(eEX1CMAX)
+
+    if eMAX > eEX1CMAX:
+        print("Cumple")
+    else:
+        print("No cumple")
+
+    dEX1CMIN = round((mvex1cmin - mhex1cmin) / fvex1cmin, 2)
+    print(dEX1CMIN)
+    eEX1CMIN = round((base_muro / 2) - dEX1CMIN, 2)
+    print(eEX1CMIN)
+
+    if eMAX > eEX1CMIN:
+        print("Cumple")
+    else:
+        print("No cumple")
+
+    dEX2CMAX = round((mvex2cmax - mhex2cmax) / fvex2cmax, 2)
+    print(dEX2CMAX)
+    eEX2CMAX = round((base_muro / 2) - dEX2CMAX, 2)
+    print(eEX2CMAX)
+
+    if eMAX > eEX2CMAX:
+        print("Cumple")
+    else:
+        print("No cumple")
+
+    dEX2CMIN = round((mvex2cmin - mhex2cmin) / fvex2cmin, 2)
+    print(dEX2CMIN)
+    eEX2CMIN = round((base_muro / 2) - dEX2CMIN, 2)
+    print(eEX2CMIN)
+
+    if eMAX > eEX2CMIN:
+        print("Cumple")
+    else:
+        print("No cumple")
+
+    dS = round((mvs - mhs) / fvs, 2)
+    print(dS)
+    eS = round((base_muro / 2) - dS, 2)
+    print(eS)
+
+    if eMAX > eS:
+        print("Cumple")
+    else:
+        print("No cumple")
+
+    return (er1cmax, eR1CMIN, eEX1CMAX, eEX1CMIN, eEX2CMAX, eEX2CMIN, eS)
