@@ -195,7 +195,8 @@ def calculate_design_logic(select_design, data):
               base_corona, altura_pantalla)
 
         if select_design == "Con inclinación":
-            soil_loads(soil_bearing_capacity)
+            capacidad_portante_r1, capacidad_portante_ex1, capacidad_portante_ex2, capacidad_portante_s = soil_loads(
+                soil_bearing_capacity)
             area_barrera, centroide_x_barrera, f = select_barrier(base_corona)
             vdc, mdc = weight_wall(base_corona, altura_pantalla, base_vastago, pie, base_muro,
                                    altura_zapata, angle_inclination, area_barrera, centroide_x_barrera)
@@ -220,7 +221,11 @@ def calculate_design_logic(select_design, data):
                 mls, meho, mpseis, mct)
             slip_verification(angle_friction, passive_thrust, fvr1cmax, fvr1cmin, fvex1cmax, fvex1cmin,
                               fvex2cmax, fvex2cmin, fvs, fhr1cmax, fhr1cmin, fhex1cmax, fhex1cmin, fhex2cmax, fhex2cmin, fhs)
-            
+            eR1CMAX, eR1CMIN, eEX1CMAX, eEX1CMIN, eEX2CMAX, eEX2CMIN, eS = rollover_verification(
+                base_muro, mvr1cmax, mhr1cmax, fvr1cmax, mvr1cmin, mhr1cmin, fvr1cmin, mvex1cmax, mhex1cmax, fvex1cmax, mvex1cmin, mhex1cmin, fvex1cmin, mvex2cmax, mhex2cmax, fvex2cmax, mvex2cmin, mhex2cmin, fvex2cmin, mvs, mhs, fvs)
+            stress_verification(base_muro, fvr1cmax, eR1CMAX, capacidad_portante_ex1, capacidad_portante_r1, fvr1cmin, eR1CMIN, fvex1cmax,
+                                eEX1CMAX, capacidad_portante_ex2, fvex1cmin, eEX1CMIN, fvex2cmax, eEX2CMAX, fvex2cmin, eEX2CMIN, fvs, eS, capacidad_portante_s)
+
         elif select_design == "Sin inclinación - vías":
             print("Sin inclinación - vías")
         elif select_design == "Sin inclinación":
@@ -250,22 +255,18 @@ def soil_loads(soil_bearing_capacity):
     """Estado limite resistencia 1"""
 
     capacidad_portante_r1 = round(0.45 * soil_bearing_capacity, 2)
-    print(capacidad_portante_r1)
-
     """Estado limite evento extremo 1"""
 
     capacidad_portante_ex1 = round(0.8 * soil_bearing_capacity, 2)
-    print(capacidad_portante_ex1)
-
     """Estado limite evento extremo 2"""
 
     capacidad_portante_ex2 = round(0.8 * soil_bearing_capacity, 2)
-    print(capacidad_portante_ex2)
-
     """Estado límite de servicio"""
 
     capacidad_portante_s = round(0.65 * soil_bearing_capacity, 2)
-    print(capacidad_portante_s)
+    print("soil_loads", capacidad_portante_r1, capacidad_portante_ex1,
+          capacidad_portante_ex2, capacidad_portante_s)
+    return (capacidad_portante_r1, capacidad_portante_ex1, capacidad_portante_ex2, capacidad_portante_s)
 
 
 def select_barrier(base_corona):
@@ -281,25 +282,18 @@ def select_barrier(base_corona):
         area_barrera = 0.21
         centroide_x_barrera = 0.15
         f = 0.87
+    print("select_barrier", area_barrera, centroide_x_barrera, f)
     return (area_barrera, centroide_x_barrera, f)
 
 
 def weight_wall(base_corona, altura_pantalla, base_vastago, pie, base_muro, altura_zapata, angle_inclination, area_barrera, centroide_x_barrera):
-    print("BASES y ALTURA", base_muro, altura_zapata)
+
     DCP1 = round((base_corona * altura_pantalla * 24), 2)
-    # print(DCP1)
     DCX1 = round(pie + (base_corona / 2), 2)
-    # print(DCX1)
-
     DCP2 = round(((base_vastago - base_corona) * altura_pantalla * 24) / 2, 2)
-    # print(DCP2)
     DCX2 = round(pie + base_corona + (base_vastago - base_corona) / 3, 2)
-    # print(DCX2)
-
     DCP3 = round(base_muro * altura_zapata * 24, 2)
-    # print(DCP3)
     DCX3 = round(base_muro / 2, 2)
-    # print(DCX3)
 
     if angle_inclination == 0:
         DCP4 = round(area_barrera * 24, 2)
@@ -308,76 +302,53 @@ def weight_wall(base_corona, altura_pantalla, base_vastago, pie, base_muro, altu
         DCP4 = 0
         DCX4 = 0
 
-    # print(DCP4)
-    # print(DCX4)
-
     vdc = round((DCP1 + DCP2 + DCP3 + DCP4), 2)
-    # print(VDC)
-
     mdc = round(DCP1*DCX1 + DCP2*DCX2 + DCP3*DCX3 + DCP4*DCX4, 2)
-    # print(MDC)
+    print("weight_wall", vdc, mdc)
+
     return (vdc, mdc)
 
 
 def weight_soil(base_vastago, base_corona, altura_pantalla, unit_weight, pie, talon, angle_inclination):
-    print("SUELO")
+
     EVP5 = round(((base_vastago - base_corona) *
                  altura_pantalla * unit_weight * 10) / 2, 2)
-    # print(EVP5)
     EVX5 = round(pie + base_corona + (2 * (base_vastago - base_corona) / 3), 2)
-    # print(EVX5)
-
     EVP6 = round(talon * altura_pantalla * unit_weight * 10, 2)
-    # print(EVP6)
     EVX6 = round(pie + base_vastago + (talon / 2), 2)
-    # print(EVX6)
-
     EVP7 = round(((base_vastago - base_corona + talon) * (tan(radians(angle_inclination))
                  * (base_vastago - base_corona + talon)) * unit_weight * 10) / 2, 2)
-    # print(base_vastago, base_corona, talon, angle_inclination, unit_weight)
-
-    # print(EVP7)
     EVX7 = round(pie + base_corona +
                  (2 * (base_vastago - base_corona + talon) / 3), 2)
-    # print(EVX7)
-
     vev = round((EVP5 + EVP6 + EVP7), 2)
-    # print(VEV)
-
     mev = round((EVP5 * EVX5 + EVP6 * EVX6 + EVP7 * EVX7), 2)
-    # print(MEV)
+
+    print("weight_soil", vev, mev)
+
     return (vev, mev)
 
 
 def Active_and_passive_thrust(angle_friction, beta_rad, angle_soil_wall, angle_inclination, base_vastago, base_corona, talon, wall_height, unit_weight, altura_zapata, diente):
-    print("EMPUJE ACT Y PAS")
     "2.4.1 Empuje activo y pasivo del relleno (EH)"
     # Caso i = 0
     ka1 = round(((tan(radians(45) - (angle_friction / 2))) ** 2), 2)
-    # print(ka1)
 
     # Caso i > 0
     numerador = (cos(angle_friction - radians(beta_rad))) ** 2
-    # print(numerador)
     denominador = cos(radians(beta_rad)) ** 2 * \
         cos(angle_soil_wall + radians(beta_rad))
-    # print(denominador)
     raiz = sqrt((sin(angle_soil_wall + angle_friction) * sin(angle_friction - radians(angle_inclination))) /
                 (cos(angle_soil_wall - radians(beta_rad)) * cos(radians(angle_inclination) - radians(beta_rad))))
-    # print(raiz)
     ka2 = round((numerador / (denominador * (1 + raiz))), 2)
-    # print(ka2)
 
     if angle_inclination == 0:
         ka = ka1
     else:
         ka = ka2
-    # print(ka)
 
     """Coeficiente Pasivo"""
 
     kp = round(((tan(radians(45) + (angle_friction / 2))) ** 2), 2)
-    # print(kp)
 
     """Empuje Activo estatico"""
 
@@ -390,7 +361,6 @@ def Active_and_passive_thrust(angle_friction, beta_rad, angle_soil_wall, angle_i
     # Empuje activo
     active_thrust = round(
         ((1 / 2) * ka * (unit_weight * 10) * ((total_height) ** 2)), 2)
-    # print(active_thrust)
 
     # NOTE: Eliminar # Componente vertical
     # vertical_component = round(
@@ -400,23 +370,22 @@ def Active_and_passive_thrust(angle_friction, beta_rad, angle_soil_wall, angle_i
     # Componente horizontal
     Horizontal_component = round(
         (active_thrust * cos(angle_soil_wall + radians(beta_rad))), 2)
-    # print(Horizontal_component)
 
     # centroide y
     yEH = round((total_height / 3), 2)
-    # print(yEH)
 
     # Momento en el punto O
     meho = round((Horizontal_component * yEH), 2)
-    # print(MEHO)
 
     """Empuje pasivo"""
 
     passive_thrust = round(
         ((1 / 2) * kp * (unit_weight * 10) * ((altura_zapata + diente) ** 2)), 2)
-    # print(passive_thrust)
 
-    return (ka, kp, total_height, Horizontal_component, meho)
+    print("Active_and_passive_thrust", ka, kp, total_height,
+          Horizontal_component, meho, passive_thrust)
+
+    return (ka, kp, total_height, Horizontal_component, meho, passive_thrust)
 
 
 def f_pga(type_soil, pga):
@@ -679,10 +648,10 @@ def rollover_verification(base_muro, mvr1cmax, mhr1cmax, fvr1cmax, mvr1cmin, mhr
 
     dR1CMAX = round((mvr1cmax - mhr1cmax) / fvr1cmax, 2)
     print(dR1CMAX)
-    er1cmax = round((base_muro / 2) - dR1CMAX, 2)
-    print(er1cmax)
+    eR1CMAX = round((base_muro / 2) - dR1CMAX, 2)
+    print(eR1CMAX)
 
-    if eMAX > er1cmax:
+    if eMAX > eR1CMAX:
         print("Cumple")
     else:
         print("No cumple")
@@ -747,4 +716,64 @@ def rollover_verification(base_muro, mvr1cmax, mhr1cmax, fvr1cmax, mvr1cmin, mhr
     else:
         print("No cumple")
 
-    return (er1cmax, eR1CMIN, eEX1CMAX, eEX1CMIN, eEX2CMAX, eEX2CMIN, eS)
+    return (eR1CMAX, eR1CMIN, eEX1CMAX, eEX1CMIN, eEX2CMAX, eEX2CMIN, eS)
+
+
+def stress_verification(base_muro, FVR1CMAX, eR1CMAX, capacidad_portante_ex1, capacidad_portante_r1, fVR1CMIN, eR1CMIN, fVEX1CMAX, eEX1CMAX, capacidad_portante_ex2, fVEX1CMIN, eEX1CMIN, fVEX2CMAX, eEX2CMAX, fVEX2CMIN, eEX2CMIN, fvs, eS, capacidad_portante_s):
+    """# ESFUERZO ULTIMO ACTUANTE SOBRE SUELO NO ROCOSO"""
+
+    esfuerzoR1CMAX = round(FVR1CMAX / (base_muro - 2 * eR1CMAX), 2)
+    print(esfuerzoR1CMAX)
+
+    if capacidad_portante_r1 > esfuerzoR1CMAX:
+        print("Cumple")
+    else:
+        print("No cumple")
+
+    esfuerzoR1CMIN = round(fVR1CMIN / (base_muro - 2 * eR1CMIN), 2)
+    print(esfuerzoR1CMIN)
+
+    if capacidad_portante_ex1 > esfuerzoR1CMIN:
+        print("Cumple")
+    else:
+        print("No cumple")
+
+    esfuerzoEX1CMAX = round(fVEX1CMAX / (base_muro - 2 * eEX1CMAX), 2)
+    print(esfuerzoEX1CMAX)
+
+    if capacidad_portante_ex2 > esfuerzoEX1CMAX:
+        print("Cumple")
+    else:
+        print("No cumple")
+
+    esfuerzoEX1CMIN = round(fVEX1CMIN / (base_muro - 2 * eEX1CMIN), 2)
+    print(esfuerzoEX1CMIN)
+
+    if capacidad_portante_ex2 > esfuerzoEX1CMIN:
+        print("Cumple")
+    else:
+        print("No cumple")
+
+    esfuerzoEX2CMAX = round(fVEX2CMAX / (base_muro - 2 * eEX2CMAX), 2)
+    print(esfuerzoEX2CMAX)
+
+    if capacidad_portante_ex2 > esfuerzoEX2CMAX:
+        print("Cumple")
+    else:
+        print("No cumple")
+
+    esfuerzoEX2CMIN = round(fVEX2CMIN / (base_muro - 2 * eEX2CMIN), 2)
+    print(esfuerzoEX2CMIN)
+
+    if capacidad_portante_ex2 > esfuerzoEX2CMIN:
+        print("Cumple")
+    else:
+        print("No cumple")
+
+    esfuerzoS = round(fvs / (base_muro - 2 * eS), 2)
+    print(esfuerzoS)
+
+    if capacidad_portante_s > esfuerzoS:
+        print("Cumple")
+    else:
+        print("No cumple")
