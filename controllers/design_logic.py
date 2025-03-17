@@ -201,8 +201,8 @@ def calculate_design_logic(select_design, data):
 
             area_barrera, centroide_x_barrera, f = select_barrier(base_corona)
 
-            vdc, mdc = weight_wall(base_corona, altura_pantalla, base_vastago, pie, base_muro,
-                                   altura_zapata, area_barrera, centroide_x_barrera, angle_inclination)
+            vdc, mdc = weight_wall(base_corona=base_corona, altura_pantalla=altura_pantalla, base_vastago=base_vastago, pie=pie, base_muro=base_muro,
+                                   altura_zapata=altura_zapata, area_barrera=area_barrera, centroide_x_barrera=centroide_x_barrera, angle_inclination=angle_inclination)
 
             vev, mev = weight_soil(base_vastago, base_corona, altura_pantalla,
                                    unit_weight, pie, talon, angle_inclination)
@@ -217,9 +217,10 @@ def calculate_design_logic(select_design, data):
                                            beta_rad, unit_weight, total_height, vdc, vev, Horizontal_component, fpga, angle_inclination)
 
             ls, mls = live_load(
-                ka, unit_weight, wall_height, angle_inclination)
+                ka=ka, unit_weight=unit_weight, wall_height=wall_height, angle_inclination=angle_inclination)
 
-            vct, mct = barrier_collision(wall_height, f, angle_inclination)
+            vct, mct = barrier_collision(
+                wall_height=wall_height, f=f, angle_inclination=angle_inclination)
             # TODO: Las funciones que estan debajo son iguales para el caso 2
             fvr1cmax, fvr1cmin, fvex1cmax, fvex1cmin, fvex2cmax, fvex2cmin, fvs = vertical_forces(
                 vdc, vev)
@@ -242,8 +243,8 @@ def calculate_design_logic(select_design, data):
 
             area_barrera, centroide_x_barrera, f = select_barrier(base_corona)
 
-            vdc, mdc = weight_wall(base_corona, altura_pantalla, base_vastago, pie, base_muro,
-                                   altura_zapata, area_barrera, centroide_x_barrera)
+            vdc, mdc = weight_wall(base_corona=base_corona, altura_pantalla=altura_pantalla, base_vastago=base_vastago, pie=pie, base_muro=base_muro,
+                                   altura_zapata=altura_zapata, area_barrera=area_barrera, centroide_x_barrera=centroide_x_barrera)
 
             vev, mev = weight_soil(base_vastago, base_corona, altura_pantalla,
                                    unit_weight, pie, talon)
@@ -255,9 +256,10 @@ def calculate_design_logic(select_design, data):
             pseis, mpseis = seismic_thrust(pga, angle_soil_wall, angle_friction,
                                            beta_rad, unit_weight, total_height, vdc, vev, Horizontal_component, fpga)
 
-            ls, mls = live_load(ka, unit_weight, wall_height)
+            ls, mls = live_load(
+                ka=ka, unit_weight=unit_weight, wall_height=wall_height)
 
-            vct, mct = barrier_collision(wall_height, f)
+            vct, mct = barrier_collision(wall_height=wall_height, f=f)
 
             fvr1cmax, fvr1cmin, fvex1cmax, fvex1cmin, fvex2cmax, fvex2cmin, fvs = vertical_forces(
                 vdc, vev)
@@ -281,8 +283,8 @@ def calculate_design_logic(select_design, data):
 
             area_barrera, centroide_x_barrera, f = select_barrier(base_corona)
 
-            vdc, mdc = weight_wall(base_corona, altura_pantalla, base_vastago, pie, base_muro,
-                                   altura_zapata, area_barrera, centroide_x_barrera, case3=True)
+            vdc, mdc = weight_wall(base_corona=base_corona, altura_pantalla=altura_pantalla, base_vastago=base_vastago, pie=pie, base_muro=base_muro,
+                                   altura_zapata=altura_zapata, area_barrera=area_barrera, centroide_x_barrera=centroide_x_barrera, case3=True)
 
             vev, mev = weight_soil(base_vastago, base_corona, altura_pantalla,
                                    unit_weight, pie, talon)
@@ -298,6 +300,22 @@ def calculate_design_logic(select_design, data):
             ls, mls = live_load()
 
             vct, mct = barrier_collision(case3=True)
+            # -----------------------------------------------------
+            fvr1cmax, fvr1cmin, fvex1cmax, fvex1cmin, fvex2cmax, fvex2cmin, fvs = vertical_forces(
+                vdc, vev)
+            fhr1cmax, fhr1cmin, fhex1cmax, fhex1cmin, fhex2cmax, fhex2cmin, fhs = horizontal_forces(
+                ls, pseis, Horizontal_component, vct)
+            mvr1cmax, mvr1cmin, mvex1cmax, mvex1cmin, mvex2cmax, mvex2cmin, mvs = horizontal_moments(
+                mdc, mev)
+            mhr1cmax, mhr1cmin, mhex1cmax, mhex1cmin, mhex2cmax, mhex2cmin, mhs = vertical_moments(
+                mls, meho, mpseis, mct)
+            slip_verification(angle_friction, passive_thrust, fvr1cmax, fvr1cmin, fvex1cmax, fvex1cmin,
+                              fvex2cmax, fvex2cmin, fvs, fhr1cmax, fhr1cmin, fhex1cmax, fhex1cmin, fhex2cmax, fhex2cmin, fhs)
+            eR1CMAX, eR1CMIN, eEX1CMAX, eEX1CMIN, eEX2CMAX, eEX2CMIN, eS = rollover_verification(
+                base_muro, mvr1cmax, mhr1cmax, fvr1cmax, mvr1cmin, mhr1cmin, fvr1cmin, mvex1cmax, mhex1cmax, fvex1cmax, mvex1cmin, mhex1cmin, fvex1cmin, mvex2cmax, mhex2cmax, fvex2cmax, mvex2cmin, mhex2cmin, fvex2cmin, mvs, mhs, fvs)
+            stress_verification(base_muro, fvr1cmax, eR1CMAX, capacidad_portante_ex1, capacidad_portante_r1, fvr1cmin, eR1CMIN, fvex1cmax,
+                                eEX1CMAX, capacidad_portante_ex2, fvex1cmin, eEX1CMIN, fvex2cmax, eEX2CMAX, fvex2cmin, eEX2CMIN, fvs, eS, capacidad_portante_s)
+
         # Resultados
         results = {
             "Base del muro": base_muro,
@@ -563,7 +581,7 @@ def live_load(ka=0, unit_weight=0, wall_height=0, angle_inclination=0):
     return (ls, mls)
 
 
-def barrier_collision(case3=False, wall_height=0, f=0, angle_inclination=0):
+def barrier_collision(wall_height=0, f=0, angle_inclination=0, case3=False):
     print("""# 2.4.4 Fuerza de colisión CT sobre la barrera""")
     """# 2.4.4 Fuerza de colisión CT sobre la barrera"""
     fhb = 240
@@ -571,20 +589,13 @@ def barrier_collision(case3=False, wall_height=0, f=0, angle_inclination=0):
 
     if angle_inclination == 0:
         vct = round(fhb / (lifh + wall_height + f), 2)
-    else:
-        vct = 0
-
-    yct = round(0.81 + wall_height, 2)
-
-    mct = round(vct * yct, 2)
-    if (case3):
+    elif case3:
         vct = 0
         mct = 0
-        print(vct, mct)
-        return (vct, mct)
     else:
-        print(vct, mct)
-        return (vct, mct)
+        vct = round(fhb / (lifh + wall_height + f), 2)
+        yct = round(0.81 + wall_height, 2)
+        mct = round(vct * yct, 2)
 
 
 def vertical_forces(vdc, vev):
