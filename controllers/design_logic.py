@@ -297,7 +297,7 @@ def calculate_design_logic(select_design, data):
                                            beta_rad, unit_weight, total_height, vdc, vev, Horizontal_component, fpga)
             # -----------------------------------------------------
 
-            ls, mls = live_load()
+            ls, mls = live_load(case3=True)
 
             vct, mct = barrier_collision(case3=True)
             # -----------------------------------------------------
@@ -380,15 +380,12 @@ def weight_wall(base_corona, altura_pantalla, base_vastago, pie, base_muro, altu
     DCP3 = round(base_muro * altura_zapata * 24, 2)
     DCX3 = round(base_muro / 2, 2)
 
-    if angle_inclination == 0:
-        DCP4 = round(area_barrera * 24, 2)
-        DCX4 = round(centroide_x_barrera, 2)
-    elif case3:
+    if angle_inclination > 0 or case3:
         DCP4 = 0
         DCX4 = 0
     else:
-        DCP4 = 0
-        DCX4 = 0
+        DCP4 = round(area_barrera * 24, 2)
+        DCX4 = round(centroide_x_barrera, 2)
 
     vdc = round((DCP1 + DCP2 + DCP3 + DCP4), 2)
     mdc = round(DCP1*DCX1 + DCP2*DCX2 + DCP3*DCX3 + DCP4*DCX4, 2)
@@ -561,24 +558,24 @@ def seismic_thrust(pga, angle_soil_wall, angle_friction, beta_rad, unit_weight, 
     return (pseis, mpseis)
 
 
-def live_load(ka=0, unit_weight=0, wall_height=0, angle_inclination=0):
+def live_load(ka=0, unit_weight=0, wall_height=0, angle_inclination=0, case3=False):
     print("""# 2.4.3 sobrecarga por carga viva (LS)""")
 
     heq = 0.6
     delta_p = (ka * (unit_weight * 9.806) * heq * 100 * ((10) ** (-3)))
-    print(delta_p)
 
-    if angle_inclination == 0:
-        ls = round(wall_height * delta_p, 2)
-    else:
+    if angle_inclination > 0 or case3:
         ls = 0
-
-    yLS = round(wall_height / 2, 2)
-    print(yLS)
-
-    mls = round(ls * yLS, 2)
-    print(ls, mls)
-    return (ls, mls)
+        yLS = 0
+        mls = 0
+        print(ls, mls)
+        return (ls, mls)
+    else:
+        ls = round(wall_height * delta_p, 2)
+        yLS = round(wall_height / 2, 2)
+        mls = round(ls * yLS, 2)
+        print(ls, mls)
+        return (ls, mls)
 
 
 def barrier_collision(wall_height=0, f=0, angle_inclination=0, case3=False):
@@ -587,15 +584,17 @@ def barrier_collision(wall_height=0, f=0, angle_inclination=0, case3=False):
     fhb = 240
     lifh = 1.07
 
-    if angle_inclination == 0:
-        vct = round(fhb / (lifh + wall_height + f), 2)
-    elif case3:
+    if angle_inclination > 0 or case3:
         vct = 0
         mct = 0
+        print(vct, mct)
+        return (vct, mct)
     else:
         vct = round(fhb / (lifh + wall_height + f), 2)
         yct = round(0.81 + wall_height, 2)
         mct = round(vct * yct, 2)
+        print(vct, mct)
+        return (vct, mct)
 
 
 def vertical_forces(vdc, vev):
@@ -819,7 +818,7 @@ def stress_verification(base_muro, FVR1CMAX, eR1CMAX, capacidad_portante_ex1, ca
     esfuerzoR1CMIN = round(fVR1CMIN / (base_muro - 2 * eR1CMIN), 2)
     print(esfuerzoR1CMIN)
 
-    if capacidad_portante_ex1 > esfuerzoR1CMIN:
+    if capacidad_portante_r1 > esfuerzoR1CMIN:
         print("Cumple")
     else:
         print("No cumple")
@@ -827,7 +826,7 @@ def stress_verification(base_muro, FVR1CMAX, eR1CMAX, capacidad_portante_ex1, ca
     esfuerzoEX1CMAX = round(fVEX1CMAX / (base_muro - 2 * eEX1CMAX), 2)
     print(esfuerzoEX1CMAX)
 
-    if capacidad_portante_ex2 > esfuerzoEX1CMAX:
+    if capacidad_portante_ex1 > esfuerzoEX1CMAX:
         print("Cumple")
     else:
         print("No cumple")
@@ -835,7 +834,7 @@ def stress_verification(base_muro, FVR1CMAX, eR1CMAX, capacidad_portante_ex1, ca
     esfuerzoEX1CMIN = round(fVEX1CMIN / (base_muro - 2 * eEX1CMIN), 2)
     print(esfuerzoEX1CMIN)
 
-    if capacidad_portante_ex2 > esfuerzoEX1CMIN:
+    if capacidad_portante_ex1 > esfuerzoEX1CMIN:
         print("Cumple")
     else:
         print("No cumple")
