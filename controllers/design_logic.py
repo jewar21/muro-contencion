@@ -330,7 +330,30 @@ def calculate_design_logic(select_design, data):
         }
 
         # Mostrar resultados
-        return results
+        # return results
+        return {
+            "Base del muro": base_muro,
+            "Pie": pie,
+            "Talón": talon,
+            "Base corona": base_corona,
+            "Base vástago": base_vastago,
+            "Altura de zapata": altura_zapata,
+            "h": altura_pantalla,
+            "Ángulo de inclinación del Vástago": beta_rad,
+            "Resistencia del acero (fy)": fy,
+            # Verificaciones de estabilidad
+            "fhr1cmax": fhr1cmax, "fhr1cmin": fhr1cmin,
+            "fhex1cmax": fhex1cmax, "fhex1cmin": fhex1cmin,
+            "fhex2cmax": fhex2cmax, "fhex2cmin": fhex2cmin,
+            "fhs": fhs,
+            "RRR1CMAX": passive_thrust, "RRR1CMIN": passive_thrust,
+            "eMAX": base_muro / 3,
+            "eR1CMAX": eR1CMAX, "eR1CMIN": eR1CMIN,
+            "eEX1CMAX": eEX1CMAX, "eEX1CMIN": eEX1CMIN,
+            "capacidad_portante_r1": capacidad_portante_r1,
+            "esfuerzoR1CMAX": passive_thrust, "esfuerzoR1CMIN": passive_thrust,
+            "esfuerzoEX1CMAX": passive_thrust, "esfuerzoEX1CMIN": passive_thrust,
+        }
 
     except ValueError as e:
         raise ValueError(f"Error en el cálculo: {e}")
@@ -513,6 +536,7 @@ def seismic_thrust(pga, angle_soil_wall, angle_friction, beta_rad, unit_weight, 
 
     Ɵ = (atan(kh))
 
+    # TODO: Si el númerador2 es negativo no debe dejar pasar al calculo para evitar errores utilizar un try cacht
     numerador2 = sin(angle_soil_wall + angle_friction) * \
         sin(angle_friction - Ɵ - radians(angle_inclination))
     denominador2 = cos(angle_soil_wall + radians(beta_rad) + Ɵ) * \

@@ -187,21 +187,56 @@ class Predimensioning(tk.Toplevel):
         Realiza cálculos basados en input_data y full_data y devuelve los resultados en un diccionario.
         """
         # Simulación de cálculos para las tablas
-        return {
-            "deslizamiento": [
-                ("RESISTENCIA 1", "MÁXIMO", "100", "80", "SÍ"),
-                ("", "MÍNIMO", "90", "85", "SÍ"),
-                ("EVENTO EXTREMO I", "MÁXIMO", "85", "70", "NO"),
-                ("", "MÍNIMO", "80", "75", "SÍ"),
-                ("EVENTO EXTREMO II", "MÁXIMO", "85", "70", "NO"),
-                ("", "MÍNIMO", "80", "75", "SÍ"),
-                ("SERVICIO 1", "", "100", "80", "SÍ"),
-            ],
-            "volcamiento": [
-                ("RESISTENCIA 1", "MÁXIMO", "200", "150", "Sí"),
-                ("", "MÍNIMO", "180", "160", "Sí"),
-            ],
-            "carga": [
-                ("CAPACIDAD CARGA", "MÁXIMO", "300", "250", "Sí"),
-            ],
-        }
+        print("VALORES DE LA TABLA: ", self.input_data)
+        try:
+            return {
+                "deslizamiento": [
+                    ("RESISTENCIA 1", "MÁXIMO", "100", "80", "SÍ"),
+                    ("", "MÍNIMO", "90", "85", "SÍ"),
+                    ("EVENTO EXTREMO I", "MÁXIMO", "85", "70", "NO"),
+                    ("", "MÍNIMO", "80", "75", "SÍ"),
+                    ("EVENTO EXTREMO II", "MÁXIMO", "85", "70", "NO"),
+                    ("", "MÍNIMO", "80", "75", "SÍ"),
+                    ("SERVICIO 1", "", "100", "80", "SÍ"),
+                ],
+                "volcamiento": [
+                    ("RESISTENCIA 1", "MÁXIMO", "200", "150", "Sí"),
+                    ("", "MÍNIMO", "180", "160", "Sí"),
+                ],
+                "carga": [
+                    ("CAPACIDAD CARGA", "MÁXIMO", "300", "250", "Sí"),
+                ],
+            }
+            # return {
+            #     "deslizamiento": [
+            #         ("RESISTENCIA 1", "MÁXIMO", self.input_data["fhr1cmax"], self.input_data["RRR1CMAX"], "SÍ"),
+            #         ("", "MÍNIMO", self.input_data["fhr1cmin"], self.input_data["RRR1CMIN"], "SÍ"),
+            #         ("EVENTO EXTREMO I", "MÁXIMO", self.input_data["fhex1cmax"], self.input_data["esfuerzoEX1CMAX"], "NO"),
+            #         ("", "MÍNIMO", self.input_data["fhex1cmin"], self.input_data["esfuerzoEX1CMIN"], "SÍ"),
+            #         ("EVENTO EXTREMO II", "MÁXIMO", self.input_data["fhex2cmax"], self.input_data["esfuerzoEX1CMAX"], "NO"),
+            #         ("", "MÍNIMO", self.input_data["fhex2cmin"], self.input_data["esfuerzoEX1CMIN"], "SÍ"),
+            #         ("SERVICIO 1", "", self.input_data["fhs"], self.input_data["esfuerzoEX1CMAX"], "SÍ"),
+            #     ],
+            #     "volcamiento": [
+            #         ("RESISTENCIA 1", "MÁXIMO", self.input_data["eMAX"], self.input_data["eR1CMAX"], "SÍ"),
+            #         ("", "MÍNIMO", self.input_data["eMAX"], self.input_data["eR1CMIN"], "SÍ"),
+            #         ("EVENTO EXTREMO I", "MÁXIMO", self.input_data["eMAX"], self.input_data["eEX1CMAX"], "NO"),
+            #         ("", "MÍNIMO", self.input_data["eMAX"], self.input_data["eEX1CMIN"], "SÍ"),
+            #         ("EVENTO EXTREMO II", "MÁXIMO", self.input_data["eMAX"], self.input_data["eEX2CMAX"], "NO"),
+            #         ("", "MÍNIMO", self.input_data["eMAX"], self.input_data["eEX2CMIN"], "SÍ"),
+            #         ("SERVICIO 1", "", self.input_data["eMAX"], self.input_data["eS"], "SÍ"),
+            #     ],
+            #     "carga": [
+            #         ("RESISTENCIA 1", "MÁXIMO", self.input_data["capacidad_portante_r1"], self.input_data["esfuerzoR1CMAX"], "SÍ"),
+            #         ("", "MÍNIMO", self.input_data["capacidad_portante_r1"], self.input_data["esfuerzoR1CMIN"], "SÍ"),
+            #         ("EVENTO EXTREMO I", "MÁXIMO", self.input_data["capacidad_portante_ex1"], self.input_data["esfuerzoEX1CMAX"], "NO"),
+            #         ("", "MÍNIMO", self.input_data["capacidad_portante_ex1"], self.input_data["esfuerzoEX1CMIN"], "SÍ"),
+            #         ("EVENTO EXTREMO II", "MÁXIMO", self.input_data["capacidad_portante_ex2"], self.input_data["esfuerzoEX2CMAX"], "NO"),
+            #         ("", "MÍNIMO", self.input_data["capacidad_portante_ex2"], self.input_data["esfuerzoEX2CMIN"], "SÍ"),
+            #         ("SERVICIO 1", "", self.input_data["capacidad_portante_s"], self.input_data["esfuerzoEX1CMAX"], "SÍ"),
+            #     ],
+            # }
+        except KeyError as e:
+            messagebox.showerror(
+                "Error", f"Falta el dato {e} en los resultados.")
+            return {}
