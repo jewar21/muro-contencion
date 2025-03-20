@@ -74,7 +74,7 @@ class Predimensioning(tk.Toplevel):
 
         # Sección para las tres tablas alineadas horizontalmente
         verification_frame = tk.Frame(main_frame)
-        verification_frame.grid(row=1, column=0, columnspan=2, pady=10)
+        verification_frame.grid(row=1, column=0, columnspan=2, sticky="ew", pady=5)
 
         # Crear las tres tablas de verificación en horizontal
         self.create_verification_table(
@@ -164,7 +164,7 @@ class Predimensioning(tk.Toplevel):
         table = ttk.Treeview(frame, columns=columns, show="headings", height=7)
         for col in columns:
             table.heading(col, text=col)
-            table.column(col, anchor="center", width=100)
+            table.column(col, anchor="center", width=60)
 
         # Bloquear redimensionamiento y edición
         table["displaycolumns"] = columns
@@ -189,24 +189,6 @@ class Predimensioning(tk.Toplevel):
         # Simulación de cálculos para las tablas
         print("VALORES DE LA TABLA: ", self.input_data)
         try:
-            # return {
-            #     "deslizamiento": [
-            #         ("RESISTENCIA 1", "MÁXIMO", "100", "80", "SÍ"),
-            #         ("", "MÍNIMO", "90", "85", "SÍ"),
-            #         ("EVENTO EXTREMO I", "MÁXIMO", "85", "70", "NO"),
-            #         ("", "MÍNIMO", "80", "75", "SÍ"),
-            #         ("EVENTO EXTREMO II", "MÁXIMO", "85", "70", "NO"),
-            #         ("", "MÍNIMO", "80", "75", "SÍ"),
-            #         ("SERVICIO 1", "", "100", "80", "SÍ"),
-            #     ],
-            #     "volcamiento": [
-            #         ("RESISTENCIA 1", "MÁXIMO", "200", "150", "Sí"),
-            #         ("", "MÍNIMO", "180", "160", "Sí"),
-            #     ],
-            #     "carga": [
-            #         ("CAPACIDAD CARGA", "MÁXIMO", "300", "250", "Sí"),
-            #     ],
-            # }
             return {
                 "deslizamiento": [
                     ("RESISTENCIA 1", "MÁXIMO", self.input_data["fhr1cmax"],
