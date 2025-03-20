@@ -230,12 +230,12 @@ def calculate_design_logic(select_design, data):
                 mdc, mev)
             mhr1cmax, mhr1cmin, mhex1cmax, mhex1cmin, mhex2cmax, mhex2cmin, mhs = vertical_moments(
                 mls, meho, mpseis, mct)
-            slip_verification(angle_friction, passive_thrust, fvr1cmax, fvr1cmin, fvex1cmax, fvex1cmin,
-                              fvex2cmax, fvex2cmin, fvs, fhr1cmax, fhr1cmin, fhex1cmax, fhex1cmin, fhex2cmax, fhex2cmin, fhs)
-            eR1CMAX, eR1CMIN, eEX1CMAX, eEX1CMIN, eEX2CMAX, eEX2CMIN, eS = rollover_verification(
+            RRR1CMAX, RRR1CMIN, RREX1CMAX, RREX1CMIN, RREX2CMAX, RREXC2MIN, RRS, controlRRR1CMAX, controlRRR1CMIN, controlRREX1CMAX, controlRREX1CMIN, controlRREX1CMIN, controlRREX2CMAX, controlRREX2CMIN, controlRRS = slip_verification(angle_friction, passive_thrust, fvr1cmax, fvr1cmin, fvex1cmax, fvex1cmin,
+                                                                                                                                                                                                                                            fvex2cmax, fvex2cmin, fvs, fhr1cmax, fhr1cmin, fhex1cmax, fhex1cmin, fhex2cmax, fhex2cmin, fhs)
+            eMAX, eR1CMAX, eR1CMIN, eEX1CMAX, eEX1CMIN, eEX2CMAX, eEX2CMIN, eS, controleR1MAX, controleR1MIN, controleX1MAX, controleX1MIN, controleX2MAX, controleX2MIN, controleS = rollover_verification(
                 base_muro, mvr1cmax, mhr1cmax, fvr1cmax, mvr1cmin, mhr1cmin, fvr1cmin, mvex1cmax, mhex1cmax, fvex1cmax, mvex1cmin, mhex1cmin, fvex1cmin, mvex2cmax, mhex2cmax, fvex2cmax, mvex2cmin, mhex2cmin, fvex2cmin, mvs, mhs, fvs)
-            stress_verification(base_muro, fvr1cmax, eR1CMAX, capacidad_portante_ex1, capacidad_portante_r1, fvr1cmin, eR1CMIN, fvex1cmax,
-                                eEX1CMAX, capacidad_portante_ex2, fvex1cmin, eEX1CMIN, fvex2cmax, eEX2CMAX, fvex2cmin, eEX2CMIN, fvs, eS, capacidad_portante_s)
+            esfuerzoR1CMAX, esfuerzoR1CMIN, esfuerzoEX1CMAX, esfuerzoEX1CMIN, esfuerzoEX2CMAX, esfuerzoEX2CMIN, esfuerzoS, controlesfuerzoR1CMAX, controlesfuerzoR1CMIN, controlesfuerzoEX1CMAX, controlesfuerzoEX1CMIN, controlesfuerzoEX2CMAX, controlesfuerzoEX2CMIN, controlesfuerzoS = stress_verification(base_muro, fvr1cmax, eR1CMAX, capacidad_portante_ex1, capacidad_portante_r1, fvr1cmin, eR1CMIN, fvex1cmax,
+                                                                                                                                                                                                                                                                                                                eEX1CMAX, capacidad_portante_ex2, fvex1cmin, eEX1CMIN, fvex2cmax, eEX2CMAX, fvex2cmin, eEX2CMIN, fvs, eS, capacidad_portante_s)
 
         elif select_design == "Sin inclinación - vías":
             capacidad_portante_r1, capacidad_portante_ex1, capacidad_portante_ex2, capacidad_portante_s = soil_loads(
@@ -269,12 +269,12 @@ def calculate_design_logic(select_design, data):
                 mdc, mev)
             mhr1cmax, mhr1cmin, mhex1cmax, mhex1cmin, mhex2cmax, mhex2cmin, mhs = vertical_moments(
                 mls, meho, mpseis, mct)
-            slip_verification(angle_friction, passive_thrust, fvr1cmax, fvr1cmin, fvex1cmax, fvex1cmin,
-                              fvex2cmax, fvex2cmin, fvs, fhr1cmax, fhr1cmin, fhex1cmax, fhex1cmin, fhex2cmax, fhex2cmin, fhs)
-            eR1CMAX, eR1CMIN, eEX1CMAX, eEX1CMIN, eEX2CMAX, eEX2CMIN, eS = rollover_verification(
+            RRR1CMAX, RRR1CMIN, RREX1CMAX, RREX1CMIN, RREX2CMAX, RREXC2MIN, RRS, controlRRR1CMAX, controlRRR1CMIN, controlRREX1CMAX, controlRREX1CMIN, controlRREX1CMIN, controlRREX2CMAX, controlRREX2CMIN, controlRRS = slip_verification(angle_friction, passive_thrust, fvr1cmax, fvr1cmin, fvex1cmax, fvex1cmin,
+                                                                                                                                                                                                                                            fvex2cmax, fvex2cmin, fvs, fhr1cmax, fhr1cmin, fhex1cmax, fhex1cmin, fhex2cmax, fhex2cmin, fhs)
+            eMAX, eR1CMAX, eR1CMIN, eEX1CMAX, eEX1CMIN, eEX2CMAX, eEX2CMIN, eS, controleR1MAX, controleR1MIN, controleX1MAX, controleX1MIN, controleX2MAX, controleX2MIN, controleS = rollover_verification(
                 base_muro, mvr1cmax, mhr1cmax, fvr1cmax, mvr1cmin, mhr1cmin, fvr1cmin, mvex1cmax, mhex1cmax, fvex1cmax, mvex1cmin, mhex1cmin, fvex1cmin, mvex2cmax, mhex2cmax, fvex2cmax, mvex2cmin, mhex2cmin, fvex2cmin, mvs, mhs, fvs)
-            stress_verification(base_muro, fvr1cmax, eR1CMAX, capacidad_portante_ex1, capacidad_portante_r1, fvr1cmin, eR1CMIN, fvex1cmax,
-                                eEX1CMAX, capacidad_portante_ex2, fvex1cmin, eEX1CMIN, fvex2cmax, eEX2CMAX, fvex2cmin, eEX2CMIN, fvs, eS, capacidad_portante_s)
+            esfuerzoR1CMAX, esfuerzoR1CMIN, esfuerzoEX1CMAX, esfuerzoEX1CMIN, esfuerzoEX2CMAX, esfuerzoEX2CMIN, esfuerzoS, controlesfuerzoR1CMAX, controlesfuerzoR1CMIN, controlesfuerzoEX1CMAX, controlesfuerzoEX1CMIN, controlesfuerzoEX2CMAX, controlesfuerzoEX2CMIN, controlesfuerzoS = stress_verification(base_muro, fvr1cmax, eR1CMAX, capacidad_portante_ex1, capacidad_portante_r1, fvr1cmin, eR1CMIN, fvex1cmax,
+                                                                                                                                                                                                                                                                                                                eEX1CMAX, capacidad_portante_ex2, fvex1cmin, eEX1CMIN, fvex2cmax, eEX2CMAX, fvex2cmin, eEX2CMIN, fvs, eS, capacidad_portante_s)
 
         elif select_design == "Sin inclinación":
             # TODO: Esto es igual al caso anterior
@@ -309,12 +309,12 @@ def calculate_design_logic(select_design, data):
                 mdc, mev)
             mhr1cmax, mhr1cmin, mhex1cmax, mhex1cmin, mhex2cmax, mhex2cmin, mhs = vertical_moments(
                 mls, meho, mpseis, mct)
-            slip_verification(angle_friction, passive_thrust, fvr1cmax, fvr1cmin, fvex1cmax, fvex1cmin,
-                              fvex2cmax, fvex2cmin, fvs, fhr1cmax, fhr1cmin, fhex1cmax, fhex1cmin, fhex2cmax, fhex2cmin, fhs)
-            eR1CMAX, eR1CMIN, eEX1CMAX, eEX1CMIN, eEX2CMAX, eEX2CMIN, eS = rollover_verification(
+            RRR1CMAX, RRR1CMIN, RREX1CMAX, RREX1CMIN, RREX2CMAX, RREXC2MIN, RRS, controlRRR1CMAX, controlRRR1CMIN, controlRREX1CMAX, controlRREX1CMIN, controlRREX1CMIN, controlRREX2CMAX, controlRREX2CMIN, controlRRS = slip_verification(angle_friction, passive_thrust, fvr1cmax, fvr1cmin, fvex1cmax, fvex1cmin,
+                                                                                                                                                                                                                                            fvex2cmax, fvex2cmin, fvs, fhr1cmax, fhr1cmin, fhex1cmax, fhex1cmin, fhex2cmax, fhex2cmin, fhs)
+            eMAX, eR1CMAX, eR1CMIN, eEX1CMAX, eEX1CMIN, eEX2CMAX, eEX2CMIN, eS, controleR1MAX, controleR1MIN, controleX1MAX, controleX1MIN, controleX2MAX, controleX2MIN, controleS = rollover_verification(
                 base_muro, mvr1cmax, mhr1cmax, fvr1cmax, mvr1cmin, mhr1cmin, fvr1cmin, mvex1cmax, mhex1cmax, fvex1cmax, mvex1cmin, mhex1cmin, fvex1cmin, mvex2cmax, mhex2cmax, fvex2cmax, mvex2cmin, mhex2cmin, fvex2cmin, mvs, mhs, fvs)
-            stress_verification(base_muro, fvr1cmax, eR1CMAX, capacidad_portante_ex1, capacidad_portante_r1, fvr1cmin, eR1CMIN, fvex1cmax,
-                                eEX1CMAX, capacidad_portante_ex2, fvex1cmin, eEX1CMIN, fvex2cmax, eEX2CMAX, fvex2cmin, eEX2CMIN, fvs, eS, capacidad_portante_s)
+            esfuerzoR1CMAX, esfuerzoR1CMIN, esfuerzoEX1CMAX, esfuerzoEX1CMIN, esfuerzoEX2CMAX, esfuerzoEX2CMIN, esfuerzoS, controlesfuerzoR1CMAX, controlesfuerzoR1CMIN, controlesfuerzoEX1CMAX, controlesfuerzoEX1CMIN, controlesfuerzoEX2CMAX, controlesfuerzoEX2CMIN, controlesfuerzoS = stress_verification(base_muro, fvr1cmax, eR1CMAX, capacidad_portante_ex1, capacidad_portante_r1, fvr1cmin, eR1CMIN, fvex1cmax,
+                                                                                                                                                                                                                                                                                                                eEX1CMAX, capacidad_portante_ex2, fvex1cmin, eEX1CMIN, fvex2cmax, eEX2CMAX, fvex2cmin, eEX2CMIN, fvs, eS, capacidad_portante_s)
 
         # Resultados
         results = {
@@ -341,18 +341,30 @@ def calculate_design_logic(select_design, data):
             "h": altura_pantalla,
             "Ángulo de inclinación del Vástago": beta_rad,
             "Resistencia del acero (fy)": fy,
-            # Verificaciones de estabilidad
-            "fhr1cmax": fhr1cmax, "fhr1cmin": fhr1cmin,
-            "fhex1cmax": fhex1cmax, "fhex1cmin": fhex1cmin,
-            "fhex2cmax": fhex2cmax, "fhex2cmin": fhex2cmin,
-            "fhs": fhs,
-            "RRR1CMAX": passive_thrust, "RRR1CMIN": passive_thrust,
-            "eMAX": base_muro / 3,
-            "eR1CMAX": eR1CMAX, "eR1CMIN": eR1CMIN,
-            "eEX1CMAX": eEX1CMAX, "eEX1CMIN": eEX1CMIN,
-            "capacidad_portante_r1": capacidad_portante_r1,
-            "esfuerzoR1CMAX": passive_thrust, "esfuerzoR1CMIN": passive_thrust,
-            "esfuerzoEX1CMAX": passive_thrust, "esfuerzoEX1CMIN": passive_thrust,
+            # -------------------------------------------
+            "fhr1cmax": fhr1cmax, "RRR1CMAX": RRR1CMAX, "controlRRR1CMAX": controlRRR1CMAX,
+            "fhr1cmin": fhr1cmin, "RRR1CMIN": RRR1CMIN, "controlRRR1CMIN": controlRRR1CMIN,
+            "fhex1cmax": fhex1cmax, "RREX1CMAX": RREX1CMAX, "controlRREX1CMAX": controlRREX1CMAX,
+            "fhex1cmin": fhex1cmin, "RREX1CMIN": RREX1CMIN, "controlRREX1CMIN": controlRREX1CMIN,
+            "fhex2cmax": fhex2cmax, "RREX2CMAX": RREX2CMAX, "controlRREX2CMAX": controlRREX2CMAX,
+            "fhex2cmin": fhex2cmin, "RREXC2MIN": RREXC2MIN, "controlRREX2CMIN": controlRREX2CMIN,
+            "fhs": fhs, "RR": RRS, "controlRRS": controlRRS,
+            # -----------------------------------------------
+            "eMAX": eMAX, "eR1CMAX": eR1CMAX, "controleR1MAX": controleR1MAX,
+            "eR1CMIN": eR1CMIN, "controleR1MIN": controleR1MIN,
+            "eEX1CMAX": eEX1CMAX, "controleX1MAX": controleX1MAX,
+            "eEX1CMIN": eEX1CMIN, "controleX1MIN": controleX1MIN,
+            "eEX2CMAX": eEX2CMAX, "controleX2MAX": controleX2MAX,
+            "eEX2CMIN": eEX2CMIN, "controleX2MIN": controleX2MIN,
+            "eS": eS, "controleS": controleS,
+            # -------------------------------------------------
+            "capacidad_portante_r1": capacidad_portante_r1, "esfuerzoR1CMAX": esfuerzoR1CMAX, "controlesfuerzoR1CMAX": controlesfuerzoR1CMAX,
+            "esfuerzoR1CMIN": esfuerzoR1CMIN, "controlesfuerzoR1CMIN": controlesfuerzoR1CMIN,
+            "capacidad_portante_ex1": capacidad_portante_ex1, "esfuerzoEX1CMAX": esfuerzoEX1CMAX, "controlesfuerzoEX1CMAX": controlesfuerzoEX1CMAX,
+            "esfuerzoEX1CMIN": esfuerzoEX1CMIN, "controlesfuerzoEX1CMIN": controlesfuerzoEX1CMIN,
+            "capacidad_portante_ex2": capacidad_portante_ex2, "esfuerzoEX2CMAX": esfuerzoEX2CMAX, "controlesfuerzoEX2CMAX": controlesfuerzoEX2CMAX,
+            "esfuerzoEX2CMIN": esfuerzoEX2CMIN, "controlesfuerzoEX2CMIN": controlesfuerzoEX2CMIN,
+            "capacidad_portante_s": capacidad_portante_s, "esfuerzoS": esfuerzoS, "controlesfuerzoS": controlesfuerzoS
         }
 
     except ValueError as e:
@@ -540,7 +552,7 @@ def seismic_thrust(pga, angle_soil_wall, angle_friction, beta_rad, unit_weight, 
     numerador2 = sin(angle_soil_wall + angle_friction) * \
         sin(angle_friction - Ɵ - radians(angle_inclination))
     denominador2 = cos(angle_soil_wall + radians(beta_rad) + Ɵ) * \
-        cos(angle_inclination - radians(beta_rad))
+        cos(radians(angle_inclination) - radians(beta_rad))
     raiz2 = sqrt(numerador2 / denominador2)
     Ψ = round(((1 + raiz2) ** 2), 2)
 
@@ -694,58 +706,62 @@ def slip_verification(angle_friction, passive_thrust, fvr1cmax, fvr1cmin, fvex1c
     RRR1CMAX = round(0.8 * tan(angle_friction) *
                      fvr1cmax + 0.5 * passive_thrust, 2)
 
+    controlRRR1CMAX = "NO"
+    controlRRR1CMIN = "NO"
+    controlRREX1CMAX = "NO"
+    controlRREX1CMIN = "NO"
+    controlRREX1CMIN = "NO"
+    controlRREX2CMAX = "NO"
+    controlRREX2CMIN = "NO"
+    controlRRS = "NO"
+
     if fhr1cmax < RRR1CMAX:
-        print("Cumple")
-    else:
-        print("No cumple")
+        controlRRR1CMAX = "SI"
+        print(controlRRR1CMAX)
 
     RRR1CMIN = round(0.8 * tan(angle_friction) *
                      fvr1cmin + 0.5 * passive_thrust, 2)
 
     if fhr1cmin < RRR1CMIN:
-        print("Cumple")
-    else:
-        print("No cumple")
+        controlRRR1CMIN = "SI"
+        print(controlRRR1CMIN)
 
     RREX1CMAX = round(0.8 * tan(angle_friction) *
                       fvex1cmax + 0.5 * passive_thrust, 2)
 
     if fhex1cmax < RREX1CMAX:
-        print("Cumple")
-    else:
-        print("No cumple")
+        controlRREX1CMAX = "SI"
+        print(controlRREX1CMAX)
 
     RREX1CMIN = round(0.8 * tan(angle_friction) *
                       fvex1cmin + 0.5 * passive_thrust, 2)
     print(RREX1CMIN)
 
     if fhex1cmin < RREX1CMIN:
-        print("Cumple")
-    else:
-        print("No cumple")
+        controlRREX1CMIN = "SI"
+        print(controlRREX1CMIN)
 
     RREX2CMAX = round(0.8 * tan(angle_friction) *
                       fvex2cmax + 0.5 * passive_thrust, 2)
 
     if fhex2cmax < RREX2CMAX:
-        print("Cumple")
-    else:
-        print("No cumple")
+        controlRREX2CMAX = "SI"
+        print(controlRREX2CMAX)
 
     RREXC2MIN = round(0.8 * tan(angle_friction) *
                       fvex2cmin + 0.5 * passive_thrust, 2)
 
     if fhex2cmin < RREXC2MIN:
-        print("Cumple")
-    else:
-        print("No cumple")
+        controlRREX2CMIN = "SI"
+        print(controlRREX2CMIN)
 
     RRS = round(0.8 * tan(angle_friction) * fvs + 0.5 * passive_thrust, 2)
 
     if fhs < RRS:
+        controlRRS = "SI"
         print("Cumple")
-    else:
-        print("No cumple")
+
+    return (RRR1CMAX, RRR1CMIN, RREX1CMAX, RREX1CMIN, RREX2CMAX, RREXC2MIN, RRS, controlRRR1CMAX, controlRRR1CMIN, controlRREX1CMAX, controlRREX1CMIN, controlRREX1CMIN, controlRREX2CMAX, controlRREX2CMIN, controlRRS)
 
 
 def rollover_verification(base_muro, mvr1cmax, mhr1cmax, fvr1cmax, mvr1cmin, mhr1cmin, fvr1cmin, mvex1cmax, mhex1cmax, fvex1cmax, mvex1cmin, mhex1cmin, fvex1cmin, mvex2cmax, mhex2cmax, fvex2cmax, mvex2cmin, mhex2cmin, fvex2cmin, mvs, mhs, fvs):
@@ -760,10 +776,16 @@ def rollover_verification(base_muro, mvr1cmax, mhr1cmax, fvr1cmax, mvr1cmin, mhr
     eR1CMAX = round((base_muro / 2) - dR1CMAX, 2)
     print(eR1CMAX)
 
+    controleR1MAX = "NO"
+    controleR1MIN = "NO"
+    controleX1MAX = "NO"
+    controleX1MIN = "NO"
+    controleX2MAX = "NO"
+    controleX2MIN = "NO"
+    controleS = "NO"
+
     if eMAX > eR1CMAX:
-        print("Cumple")
-    else:
-        print("No cumple")
+        controleR1MAX = "SI"
 
     dR1CMIN = round((mvr1cmin - mhr1cmin) / fvr1cmin, 2)
     print(dR1CMIN)
@@ -771,9 +793,7 @@ def rollover_verification(base_muro, mvr1cmax, mhr1cmax, fvr1cmax, mvr1cmin, mhr
     print(eR1CMIN)
 
     if eMAX > eR1CMIN:
-        print("Cumple")
-    else:
-        print("No cumple")
+        controleR1MIN = "SI"
 
     dEX1CMAX = round((mvex1cmax - mhex1cmax) / fvex1cmax, 2)
     print(dEX1CMAX)
@@ -781,9 +801,7 @@ def rollover_verification(base_muro, mvr1cmax, mhr1cmax, fvr1cmax, mvr1cmin, mhr
     print(eEX1CMAX)
 
     if eMAX > eEX1CMAX:
-        print("Cumple")
-    else:
-        print("No cumple")
+        controleX1MAX = "SI"
 
     dEX1CMIN = round((mvex1cmin - mhex1cmin) / fvex1cmin, 2)
     print(dEX1CMIN)
@@ -791,9 +809,7 @@ def rollover_verification(base_muro, mvr1cmax, mhr1cmax, fvr1cmax, mvr1cmin, mhr
     print(eEX1CMIN)
 
     if eMAX > eEX1CMIN:
-        print("Cumple")
-    else:
-        print("No cumple")
+        controleX1MIN = "SI"
 
     dEX2CMAX = round((mvex2cmax - mhex2cmax) / fvex2cmax, 2)
     print(dEX2CMAX)
@@ -801,9 +817,7 @@ def rollover_verification(base_muro, mvr1cmax, mhr1cmax, fvr1cmax, mvr1cmin, mhr
     print(eEX2CMAX)
 
     if eMAX > eEX2CMAX:
-        print("Cumple")
-    else:
-        print("No cumple")
+        controleX2MAX = "SI"
 
     dEX2CMIN = round((mvex2cmin - mhex2cmin) / fvex2cmin, 2)
     print(dEX2CMIN)
@@ -811,9 +825,7 @@ def rollover_verification(base_muro, mvr1cmax, mhr1cmax, fvr1cmax, mvr1cmin, mhr
     print(eEX2CMIN)
 
     if eMAX > eEX2CMIN:
-        print("Cumple")
-    else:
-        print("No cumple")
+        controleX2MIN = "SI"
 
     dS = round((mvs - mhs) / fvs, 2)
     print(dS)
@@ -821,68 +833,56 @@ def rollover_verification(base_muro, mvr1cmax, mhr1cmax, fvr1cmax, mvr1cmin, mhr
     print(eS)
 
     if eMAX > eS:
-        print("Cumple")
-    else:
-        print("No cumple")
+        controleS = "SI"
 
-    return (eR1CMAX, eR1CMIN, eEX1CMAX, eEX1CMIN, eEX2CMAX, eEX2CMIN, eS)
+    return (eMAX, eR1CMAX, eR1CMIN, eEX1CMAX, eEX1CMIN, eEX2CMAX, eEX2CMIN, eS, controleR1MAX, controleR1MIN, controleX1MAX, controleX1MIN, controleX2MAX, controleX2MIN, controleS)
 
 
 def stress_verification(base_muro, FVR1CMAX, eR1CMAX, capacidad_portante_ex1, capacidad_portante_r1, fVR1CMIN, eR1CMIN, fVEX1CMAX, eEX1CMAX, capacidad_portante_ex2, fVEX1CMIN, eEX1CMIN, fVEX2CMAX, eEX2CMAX, fVEX2CMIN, eEX2CMIN, fvs, eS, capacidad_portante_s):
     """# ESFUERZO ULTIMO ACTUANTE SOBRE SUELO NO ROCOSO"""
 
+    controlesfuerzoR1CMAX = "NO"
+    controlesfuerzoR1CMIN = "NO"
+    controlesfuerzoEX1CMAX = "NO"
+    controlesfuerzoEX1CMIN = "NO"
+    controlesfuerzoEX2CMAX = "NO"
+    controlesfuerzoEX2CMIN = "NO"
+    controlesfuerzoS = "NO"
+
     esfuerzoR1CMAX = round(FVR1CMAX / (base_muro - 2 * eR1CMAX), 2)
-    print(esfuerzoR1CMAX)
 
     if capacidad_portante_r1 > esfuerzoR1CMAX:
-        print("Cumple")
-    else:
-        print("No cumple")
+        controlesfuerzoR1CMAX = "SI"
 
     esfuerzoR1CMIN = round(fVR1CMIN / (base_muro - 2 * eR1CMIN), 2)
-    print(esfuerzoR1CMIN)
 
     if capacidad_portante_r1 > esfuerzoR1CMIN:
-        print("Cumple")
-    else:
-        print("No cumple")
+        controlesfuerzoR1CMIN = "SI"
 
     esfuerzoEX1CMAX = round(fVEX1CMAX / (base_muro - 2 * eEX1CMAX), 2)
     print(esfuerzoEX1CMAX)
 
     if capacidad_portante_ex1 > esfuerzoEX1CMAX:
-        print("Cumple")
-    else:
-        print("No cumple")
+        controlesfuerzoEX1CMAX = "SI"
 
     esfuerzoEX1CMIN = round(fVEX1CMIN / (base_muro - 2 * eEX1CMIN), 2)
-    print(esfuerzoEX1CMIN)
 
     if capacidad_portante_ex1 > esfuerzoEX1CMIN:
-        print("Cumple")
-    else:
-        print("No cumple")
+        controlesfuerzoEX1CMIN = "SI"
 
     esfuerzoEX2CMAX = round(fVEX2CMAX / (base_muro - 2 * eEX2CMAX), 2)
-    print(esfuerzoEX2CMAX)
 
     if capacidad_portante_ex2 > esfuerzoEX2CMAX:
-        print("Cumple")
-    else:
-        print("No cumple")
+        controlesfuerzoEX2CMAX = "SI"
 
     esfuerzoEX2CMIN = round(fVEX2CMIN / (base_muro - 2 * eEX2CMIN), 2)
-    print(esfuerzoEX2CMIN)
 
     if capacidad_portante_ex2 > esfuerzoEX2CMIN:
-        print("Cumple")
-    else:
-        print("No cumple")
+        controlesfuerzoEX2CMIN = "SI"
 
     esfuerzoS = round(fvs / (base_muro - 2 * eS), 2)
-    print(esfuerzoS)
 
     if capacidad_portante_s > esfuerzoS:
-        print("Cumple")
-    else:
-        print("No cumple")
+        controlesfuerzoS = "SI"
+
+    return (esfuerzoR1CMAX, esfuerzoR1CMIN, esfuerzoEX1CMAX, esfuerzoEX1CMIN, esfuerzoEX2CMAX, esfuerzoEX2CMIN, esfuerzoS, controlesfuerzoR1CMAX, controlesfuerzoR1CMIN, controlesfuerzoEX1CMAX, controlesfuerzoEX1CMIN, controlesfuerzoEX2CMAX, controlesfuerzoEX2CMIN, controlesfuerzoS)
