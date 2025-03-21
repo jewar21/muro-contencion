@@ -1,4 +1,5 @@
 import os
+import customtkinter as ctk
 import tkinter as tk
 from tkinter import ttk, messagebox
 from PIL import Image, ImageTk
@@ -14,44 +15,45 @@ from models.project_data import (
 from controllers.design_logic import calculate_design_logic
 
 
-class DesignParameters(tk.Tk):
+class DesignParameters(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.title("Cálculo de Muros - Parámetros de Diseño")
-        self.geometry("900x600")
+        self.geometry("1000x700")
         self.resizable(False, False)
 
         # Layout general
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
-
+        ctk.set_appearance_mode("dark")
+        ctk.set_default_color_theme("blue")
         self.setup_ui()
 
     def setup_ui(self):
         """ Configura la interfaz gráfica del formulario """
-        main_frame = tk.Frame(self, padx=10, pady=10)
+        main_frame = ctk.CTkFrame(self, corner_radius=10)
         main_frame.grid(sticky="nsew")
 
         # Lado Izquierdo - Imagen
-        left_frame = tk.Frame(main_frame)
-        left_frame.grid(row=0, column=0, sticky="ns", padx=10)
+        left_frame = ctk.CTkFrame(main_frame)
+        left_frame.grid(row=0, column=0, sticky="ns", padx=10, pady=10)
         img_path = os.path.join("assets", "images", "imagen_main.png")
 
         try:
             img = Image.open(img_path).resize((390, 390), Image.LANCZOS)
             img_tk = ImageTk.PhotoImage(img)
-            label_img = tk.Label(left_frame, image=img_tk)
+            label_img = ctk.CTkLabel(left_frame, image=img_tk)
             label_img.image = img_tk
             label_img.grid()
         except FileNotFoundError:
-            tk.Label(left_frame, text="Imagen no encontrada",
+            ctk.CTkLabel(left_frame, text="Imagen no encontrada",
                      font=("Arial", 12, "bold")).grid()
 
         # Selección de Diseño
-        select_frame = tk.Label(left_frame)
+        select_frame = ctk.CTkLabel(left_frame)
         select_frame.grid(row=1, column=0, columnspan=2, pady=5)
 
-        tk.Label(select_frame, text="Seleccione el tipo de diseño: ",
+        ctk.CTkLabel(select_frame, text="Seleccione el tipo de diseño: ",
                  font=("Arial", 12)).grid(row=0, column=0, padx=3)
 
         self.design_button = ttk.Combobox(select_frame, state="readonly",
