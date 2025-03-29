@@ -1,7 +1,7 @@
 # Valores permitidos para la resistencia del concreto
 CONCRETE_VALUES = ["21", "24.5", "28"]
 DIENTE_VALUES = ["0", "0.5"]
-TYPE_SOIL_VALUES = ["A", "B", "C", "D", "E", "F"]
+TYPE_SOIL_VALUES = ["C", "D"]
 
 # Campos del formulario (label, símbolo, key, unidad)
 FORM_FIELDS = [
@@ -13,11 +13,11 @@ FORM_FIELDS = [
     ("Resistencia del acero", "fy", "steel_resistance", "MPa"),
     ("Altura de muro", "H", "wall_height", "m"),
     ("Ángulo de inclinación del relleno", "i", "angle_inclination", "°"),
-    ("Ubicación del proyecto", "", "project_location", ""),
+    ("Ubicación del proyecto", " ", "project_location", " "),
     ("Aceleración pico efectiva", "Aa", "aa", ""),
-    ("Coeficiente de aceleración pico efectiva en roca", "PGA", "pga", ""),
-    ("Diente", "diente", "diente", "m"),
-    ("Tipo de suelo", "", "type_soil", "")
+    ("Coeficiente de aceleración pico efectiva en roca", "PGA", "pga", " "),
+    ("Dentellón", "t", "diente", "m"),
+    ("Tipo de suelo", " ", "type_soil", " ")
 ]
 
 FACTORS_BY_AA = {
