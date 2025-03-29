@@ -1,54 +1,107 @@
-# Muro de Contención
+# 📐 Proyecto Muro de Contención
 
-## Arquitectura del Proyecto
-
-El proyecto está estructurado de la siguiente manera:
-
-project/
-│
-├── main.py                # Archivo principal para iniciar la aplicación
-├── controllers/           # Lógica de negocio y validaciones
-│   ├── design_logic.py    # Funciones para los cálculos del diseño
-│   └── data_manager.py    # Funciones para manejar datos (lectura/escritura si es necesario)
-├── models/                # Modelos de datos, si se requiere manejar estructuras específicas
-│   └── project_data.py    # Modelos de datos como parámetros del proyecto
-├── views/                 # Interfaces gráficas de la aplicación
-│   ├── design_parameters.py # Primera interfaz (parámetros de diseño)
-│   └── components.py      # Componentes comunes como botones personalizados, etc.
-├── assets/                # Recursos como imágenes, íconos y estilos
-│   └── images/            # Imágenes para la interfaz
-│       └── design.png     # Imagen para la primera pantalla
-└── utils/                 # Utilidades generales
-    └── helpers.py         # Funciones comunes, validaciones, y herramientas auxiliares
-# muro-contencion
-
-
-## Descripción de los Directorios
-
-### **main.py**
-Archivo principal que sirve como punto de entrada para iniciar la aplicación.
-
-### **controllers/**
-Contiene la lógica de negocio y validaciones principales:
-- `design_logic.py`: Funciones específicas para realizar cálculos del diseño estructural.
-- `data_manager.py`: Maneja la lectura, escritura y validación de datos relacionados al proyecto.
-
-### **models/**
-Define estructuras y modelos de datos que organizan los parámetros y configuraciones:
-- `project_data.py`: Clase y estructuras que representan los datos relevantes del proyecto.
-
-### **views/**
-Maneja la interfaz gráfica de usuario (GUI) y sus componentes:
-- `design_parameters.py`: Interfaz principal donde se ingresan los parámetros de diseño.
-- `components.py`: Componentes reutilizables como botones, cuadros de mensajes, etc.
-
-### **assets/**
-Contiene recursos estáticos del proyecto:
-- **images/**: Carpeta con imágenes y gráficos para la interfaz:
-  - `design.png`: Imagen representativa para la primera pantalla.
-
-### **utils/**
-Incluye utilidades generales y funciones de soporte:
-- `helpers.py`: Funciones comunes, validaciones y herramientas auxiliares para el proyecto.
+Este documento describe la estructura, funcionalidades y lógica técnica del sistema desarrollado para el diseño y verificación de muros de contención, utilizando Python y CustomTkinter como base para la interfaz gráfica.
 
 ---
+
+## 📁 Estructura del Proyecto
+
+```plaintext
+- muro-contencion-main/
+    - muro-contencion-main/
+        - .gitignore
+        - README.md
+        - main.py
+        - main.spec
+        - .vscode/
+            - settings.json
+        - assets/
+            - images/
+                - primera_con_inclinacion.png
+                - primera_sin_inclinacion.png
+                - primera_sin_inclinacion_vias.png
+                - segunda_con_inclinacion.png
+                - segunda_sin_inclinacion.png
+                - segunda_sin_inclinacion_vias.png
+                ...
+        - controllers/
+            - data_manager.py
+            - design_logic.py
+            - verification_logic.py
+            - __pycache__/
+                - design_logic.cpython-312.pyc
+                - verification_logic.cpython-312.pyc
+        - models/
+            - project_data.py
+            - seismic_data.py
+            - __pycache__/
+                - project_data.cpython-312.pyc
+                - seismic_data.cpython-312.pyc
+        - utils/
+            - helpers.py
+        - views/
+            - components.py
+            - design_parameters.py
+            - predimensioning.py
+            - __pycache__/
+                - design_parameters.cpython-312.pyc
+                - predimensioning.cpython-312.pyc
+```
+
+---
+
+## 🧩 Descripción de Carpetas
+
+- `assets/`: contiene imágenes visuales utilizadas en la interfaz (inclinación, predimensionamiento).
+- `controllers/`: contiene la lógica de diseño estructural y cálculo (deslizamiento, volcamiento, presión).
+- `models/`: datos y estructuras necesarias para el diseño (factores de suelo, resistencias).
+- `views/`: interfaces gráficas en `customtkinter`, organizadas en pantallas como predimensionamiento y diseño.
+- `utils/`: funciones auxiliares de uso común.
+- `main.py`: archivo principal para ejecutar la aplicación.
+
+---
+
+## ⚙️ Funcionalidades Principales
+
+- Predimensionamiento de muros basado en parámetros del terreno.
+- Selección del tipo de diseño: con inclinación, sin inclinación, sin inclinación - vías.
+- Cálculos estructurales:
+  - Verificación al deslizamiento.
+  - Verificación al volcamiento.
+  - Verificación por presión.
+- Visualización de resultados en tablas.
+- Botones de edición, cálculo, cierre y exportación a PDF (en desarrollo).
+- Actualización dinámica de imágenes según tipo de diseño.
+
+---
+
+## 🔢 Tecnologías Usadas
+
+- Python 3.12+
+- CustomTkinter
+- PIL (Pillow)
+- PyInstaller (para despliegue)
+- tkinter (librería base)
+
+---
+
+## 🚀 Ejecución
+
+```bash
+pip install -r requirements.txt
+python main.py
+```
+
+---
+
+## 📌 Siguientes pasos
+
+- Finalizar integración con `reportlab` para exportación PDF.
+- Mejorar validación de entrada para campos numéricos.
+- Documentar cálculos estructurales paso a paso.
+
+---
+
+## ✍️ Autoría
+
+Proyecto académico desarrollado como solución computacional para estudiantes e ingenieros civiles, integrando principios de diseño estructural y visualización UX.
