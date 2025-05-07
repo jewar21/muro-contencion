@@ -141,6 +141,7 @@ def calculate_design_logic(select_design, data):
 
         # Seleccionar el conjunto de factores según el ángulo
         factors = FACTORS_BY_AA if angle_inclination == 0 else FACTORS_BY_AA_INCLINED
+        # TODO: Necesitamos crear caso 3
 
         # Validar que Aa esté en los factores
         if aa not in factors:
@@ -420,7 +421,7 @@ def weight_wall(base_corona, altura_pantalla, base_vastago, pie, base_muro, altu
         DCX4 = 0
     else:
         DCP4 = round(area_barrera * 24, 2)
-        DCX4 = round(centroide_x_barrera, 2)
+        DCX4 = round(centroide_x_barrera + pie, 2)
 
     vdc = round((DCP1 + DCP2 + DCP3 + DCP4), 2)
     mdc = round(DCP1*DCX1 + DCP2*DCX2 + DCP3*DCX3 + DCP4*DCX4, 2)
@@ -598,7 +599,7 @@ def live_load(ka=0, unit_weight=0, wall_height=0, angle_inclination=0, case3=Fal
     print("""# 2.4.3 sobrecarga por carga viva (LS)""")
 
     heq = 0.6
-    delta_p = (ka * (unit_weight * 9.806) * heq * 100 * ((10) ** (-3)))
+    delta_p = (ka * (unit_weight * 9.806) * heq * 1000 * ((10) ** (-3)))
 
     if angle_inclination > 0 or case3:
         ls = 0

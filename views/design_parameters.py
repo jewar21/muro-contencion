@@ -201,6 +201,7 @@ class DesignParameters(ctk.CTk):
         try:
             select_design = self.design_button.get()
             data = self.get_all_entries()
+            data["tipo_diseño"] = select_design
             results = calculate_design_logic(select_design, data)
             Predimensioning(self, results, data)
         except ValueError as e:

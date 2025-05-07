@@ -32,7 +32,8 @@ class Predimensioning(ctk.CTkToplevel):
         self.image_label.pack(pady=(10, 10))
         self.update_image()
 
-        self.predim_table = ctk.CTkFrame(left_frame, fg_color="#ffffff", corner_radius=12)
+        self.predim_table = ctk.CTkFrame(
+            left_frame, fg_color="#ffffff", corner_radius=12)
         self.predim_table.pack(pady=10)
 
         self.predim_fields = [
@@ -50,26 +51,33 @@ class Predimensioning(ctk.CTkToplevel):
         for display, key, unit in self.predim_fields:
             row = ctk.CTkFrame(self.predim_table, fg_color="transparent")
             row.pack(pady=4, fill="x")
-            display_text = display if len(display) <= 30 else f"{display[:30]}\n{display[30:]}"
-            ctk.CTkLabel(row, text=display_text, width=180, anchor="e", justify="right").pack(side="left")
+            display_text = display if len(
+                display) <= 30 else f"{display[:30]}\n{display[30:]}"
+            ctk.CTkLabel(row, text=display_text, width=180,
+                         anchor="e", justify="right").pack(side="left")
             entry = ctk.CTkEntry(row, width=100)
             entry.insert(0, f"{self.input_data.get(key, 0.0):.2f}")
             entry.configure(state="disabled")
             entry.pack(side="left", padx=5)
             self.predim_entries[key] = entry
-            ctk.CTkLabel(row, text=unit, width=40, anchor="w").pack(side="left")
+            ctk.CTkLabel(row, text=unit, width=40,
+                         anchor="w").pack(side="left")
 
         # Verificaciones
         top_right_frame = ctk.CTkFrame(content_frame, fg_color="transparent")
         top_right_frame.grid(row=0, column=1, sticky="nsew", pady=(10, 0))
 
-        self.create_verification_table(top_right_frame, "DESLIZAMIENTO", "deslizamiento", 0)
-        self.create_verification_table(top_right_frame, "VOLCAMIENTO", "volcamiento", 1)
+        self.create_verification_table(
+            top_right_frame, "DESLIZAMIENTO", "deslizamiento", 0)
+        self.create_verification_table(
+            top_right_frame, "VOLCAMIENTO", "volcamiento", 1)
 
-        bottom_right_frame = ctk.CTkFrame(content_frame, fg_color="transparent")
+        bottom_right_frame = ctk.CTkFrame(
+            content_frame, fg_color="transparent")
         bottom_right_frame.grid(row=1, column=1, sticky="nsew")
 
-        self.create_verification_table(bottom_right_frame, "PRESIÓN", "presion", 0)
+        self.create_verification_table(
+            bottom_right_frame, "PRESIÓN", "presion", 0)
 
         # Botones
         button_frame = ctk.CTkFrame(bottom_right_frame, fg_color="transparent")
@@ -101,7 +109,8 @@ class Predimensioning(ctk.CTkToplevel):
         frame = ctk.CTkFrame(parent, fg_color="#ffffff", corner_radius=12)
         frame.grid(row=0, column=col_idx, padx=10, pady=10, sticky="n")
 
-        ctk.CTkLabel(frame, text=title, font=ctk.CTkFont(size=14, weight="bold")).pack(pady=(10, 5))
+        ctk.CTkLabel(frame, text=title, font=ctk.CTkFont(
+            size=14, weight="bold")).pack(pady=(10, 5))
 
         columns = self.get_table_columns(key)
         table = ctk.CTkFrame(frame, fg_color="#f3f3f3")
@@ -111,14 +120,16 @@ class Predimensioning(ctk.CTkToplevel):
         header.pack(fill="x", padx=5)
         for i, col in enumerate(columns):
             wrap = 90 if i == 0 else 80
-            ctk.CTkLabel(header, text=col, width=wrap, wraplength=wrap, anchor="center", font=ctk.CTkFont(weight="bold")).pack(side="left")
+            ctk.CTkLabel(header, text=col, width=wrap, wraplength=wrap,
+                         anchor="center", font=ctk.CTkFont(weight="bold")).pack(side="left")
 
         for row_data in self.verification_results.get(key, []):
             row = ctk.CTkFrame(table, fg_color="transparent")
             row.pack(fill="x", padx=5, pady=1)
             for i, val in enumerate(row_data):
                 wrap = 90 if i == 0 else 80
-                ctk.CTkLabel(row, text=str(val), width=wrap, wraplength=wrap, anchor="center").pack(side="left")
+                ctk.CTkLabel(row, text=str(val), width=wrap,
+                             wraplength=wrap, anchor="center").pack(side="left")
 
     def get_table_columns(self, key):
         if key == "deslizamiento":
@@ -132,35 +143,57 @@ class Predimensioning(ctk.CTkToplevel):
         try:
             return {
                 "deslizamiento": [
-                    ("RESISTENCIA 1", "MÁXIMO", self.input_data["fhr1cmax"], self.input_data["RRR1CMAX"], self.input_data["controlRRR1CMAX"]),
-                    ("", "MÍNIMO", self.input_data["fhr1cmin"], self.input_data["RRR1CMIN"], self.input_data["controlRRR1CMIN"]),
-                    ("EVENTO EXTREMO I", "MÁXIMO", self.input_data["fhex1cmax"], self.input_data["RREX1CMAX"], self.input_data["controlRREX1CMAX"]),
-                    ("", "MÍNIMO", self.input_data["fhex1cmin"], self.input_data["RREX1CMIN"], self.input_data["controlRREX1CMIN"]),
-                    ("EVENTO EXTREMO II", "MÁXIMO", self.input_data["fhex2cmax"], self.input_data["RREX2CMAX"], self.input_data["controlRREX2CMAX"]),
-                    ("", "MÍNIMO", self.input_data["fhex2cmin"], self.input_data["RREXC2MIN"], self.input_data["controlRREX2CMIN"]),
-                    ("SERVICIO 1", "", self.input_data["fhs"], self.input_data["RR"], self.input_data["controlRRS"]),
+                    ("RESISTENCIA 1", "MÁXIMO", self.input_data["fhr1cmax"],
+                     self.input_data["RRR1CMAX"], self.input_data["controlRRR1CMAX"]),
+                    ("", "MÍNIMO", self.input_data["fhr1cmin"],
+                     self.input_data["RRR1CMIN"], self.input_data["controlRRR1CMIN"]),
+                    ("EVENTO EXTREMO I", "MÁXIMO",
+                     self.input_data["fhex1cmax"], self.input_data["RREX1CMAX"], self.input_data["controlRREX1CMAX"]),
+                    ("", "MÍNIMO", self.input_data["fhex1cmin"],
+                     self.input_data["RREX1CMIN"], self.input_data["controlRREX1CMIN"]),
+                    ("EVENTO EXTREMO II", "MÁXIMO",
+                     self.input_data["fhex2cmax"], self.input_data["RREX2CMAX"], self.input_data["controlRREX2CMAX"]),
+                    ("", "MÍNIMO", self.input_data["fhex2cmin"],
+                     self.input_data["RREXC2MIN"], self.input_data["controlRREX2CMIN"]),
+                    ("SERVICIO 1", "", self.input_data["fhs"],
+                     self.input_data["RR"], self.input_data["controlRRS"]),
                 ],
                 "volcamiento": [
-                    ("RESISTENCIA 1", "MÁXIMO", self.input_data["eMAX"], self.input_data["eR1CMAX"], self.input_data["controleR1MAX"]),
-                    ("", "MÍNIMO", self.input_data["eMAX"], self.input_data["eR1CMIN"], self.input_data["controleR1MIN"]),
-                    ("EVENTO EXTREMO I", "MÁXIMO", self.input_data["eMAX"], self.input_data["eEX1CMAX"], self.input_data["controleX1MAX"]),
-                    ("", "MÍNIMO", self.input_data["eMAX"], self.input_data["eEX1CMIN"], self.input_data["controleX1MIN"]),
-                    ("EVENTO EXTREMO II", "MÁXIMO", self.input_data["eMAX"], self.input_data["eEX2CMAX"], self.input_data["controleX2MAX"]),
-                    ("", "MÍNIMO", self.input_data["eMAX"], self.input_data["eEX2CMIN"], self.input_data["controleX2MIN"]),
-                    ("SERVICIO 1", "", self.input_data["eMAX"], self.input_data["eS"], self.input_data["controleS"]),
+                    ("RESISTENCIA 1", "MÁXIMO",
+                     self.input_data["eMAX"], self.input_data["eR1CMAX"], self.input_data["controleR1MAX"]),
+                    ("", "MÍNIMO", self.input_data["eMAX"],
+                     self.input_data["eR1CMIN"], self.input_data["controleR1MIN"]),
+                    ("EVENTO EXTREMO I", "MÁXIMO",
+                     self.input_data["eMAX"], self.input_data["eEX1CMAX"], self.input_data["controleX1MAX"]),
+                    ("", "MÍNIMO", self.input_data["eMAX"],
+                     self.input_data["eEX1CMIN"], self.input_data["controleX1MIN"]),
+                    ("EVENTO EXTREMO II", "MÁXIMO",
+                     self.input_data["eMAX"], self.input_data["eEX2CMAX"], self.input_data["controleX2MAX"]),
+                    ("", "MÍNIMO", self.input_data["eMAX"],
+                     self.input_data["eEX2CMIN"], self.input_data["controleX2MIN"]),
+                    ("SERVICIO 1", "", self.input_data["eMAX"],
+                     self.input_data["eS"], self.input_data["controleS"]),
                 ],
                 "presion": [
-                    ("RESISTENCIA 1", "MÁXIMO", self.input_data["capacidad_portante_r1"], self.input_data["esfuerzoR1CMAX"], self.input_data["controlesfuerzoR1CMAX"]),
-                    ("", "MÍNIMO", self.input_data["capacidad_portante_r1"], self.input_data["esfuerzoR1CMIN"], self.input_data["controlesfuerzoR1CMIN"]),
-                    ("EVENTO EXTREMO I", "MÁXIMO", self.input_data["capacidad_portante_ex1"], self.input_data["esfuerzoEX1CMAX"], self.input_data["controlesfuerzoEX1CMAX"]),
-                    ("", "MÍNIMO", self.input_data["capacidad_portante_ex1"], self.input_data["esfuerzoEX1CMIN"], self.input_data["controlesfuerzoEX1CMIN"]),
-                    ("EVENTO EXTREMO II", "MÁXIMO", self.input_data["capacidad_portante_ex2"], self.input_data["esfuerzoEX2CMAX"], self.input_data["controlesfuerzoEX2CMAX"]),
-                    ("", "MÍNIMO", self.input_data["capacidad_portante_ex2"], self.input_data["esfuerzoEX2CMIN"], self.input_data["controlesfuerzoEX2CMIN"]),
-                    ("SERVICIO 1", "", self.input_data["capacidad_portante_s"], self.input_data["esfuerzoS"], self.input_data["controlesfuerzoS"]),
+                    ("RESISTENCIA 1", "MÁXIMO", self.input_data["capacidad_portante_r1"],
+                     self.input_data["esfuerzoR1CMAX"], self.input_data["controlesfuerzoR1CMAX"]),
+                    ("", "MÍNIMO", self.input_data["capacidad_portante_r1"],
+                     self.input_data["esfuerzoR1CMIN"], self.input_data["controlesfuerzoR1CMIN"]),
+                    ("EVENTO EXTREMO I", "MÁXIMO", self.input_data["capacidad_portante_ex1"],
+                     self.input_data["esfuerzoEX1CMAX"], self.input_data["controlesfuerzoEX1CMAX"]),
+                    ("", "MÍNIMO", self.input_data["capacidad_portante_ex1"],
+                     self.input_data["esfuerzoEX1CMIN"], self.input_data["controlesfuerzoEX1CMIN"]),
+                    ("EVENTO EXTREMO II", "MÁXIMO", self.input_data["capacidad_portante_ex2"],
+                     self.input_data["esfuerzoEX2CMAX"], self.input_data["controlesfuerzoEX2CMAX"]),
+                    ("", "MÍNIMO", self.input_data["capacidad_portante_ex2"],
+                     self.input_data["esfuerzoEX2CMIN"], self.input_data["controlesfuerzoEX2CMIN"]),
+                    ("SERVICIO 1", "", self.input_data["capacidad_portante_s"],
+                     self.input_data["esfuerzoS"], self.input_data["controlesfuerzoS"]),
                 ],
             }
         except KeyError as e:
-            messagebox.showerror("Error", f"Falta el dato {e} en los resultados.")
+            messagebox.showerror(
+                "Error", f"Falta el dato {e} en los resultados.")
             return {}
 
     def update_image(self):
@@ -180,7 +213,7 @@ class Predimensioning(ctk.CTkToplevel):
             self.image_label.image = photo
         else:
             self.image_label.configure(text="Imagen no encontrada")
-    
+
     def export_to_pdf(self):
         from reportlab.lib.pagesizes import letter
         from reportlab.pdfgen import canvas
@@ -225,12 +258,24 @@ class Predimensioning(ctk.CTkToplevel):
                     y = height - 72
 
         c.save()
-        messagebox.showinfo("Exportación Exitosa", f"PDF guardado como {pdf_path}")
-
+        messagebox.showinfo("Exportación Exitosa",
+                            f"PDF guardado como {pdf_path}")
 
     def enable_editing(self):
         for entry in self.predim_entries.values():
             entry.configure(state="normal")
 
     def calculate_view(self):
-        print("Vista de diseño actualizada.")
+        self.update_input_data_from_entries()
+        self.verification_results = self.calculate_verification_results()
+
+        print("Recalculando vista con nuevos datos:", self.input_data)
+
+    def update_input_data_from_entries(self):
+        for key, entry in self.predim_entries.items():
+            try:
+                value = float(entry.get().strip().replace(",", "."))
+                self.input_data[key] = value
+            except ValueError:
+                messagebox.showwarning(
+                    "Advertencia", f"El valor de '{key}' no es válido.")
