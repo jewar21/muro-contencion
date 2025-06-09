@@ -4,8 +4,9 @@ from math import atan, degrees, radians, tan, sqrt, sin, cos
 import numpy as np
 
 from models.project_data import (
-    FACTORS_BY_AA,
-    FACTORS_BY_AA_INCLINED
+    FACTORS_BY_PGA,
+    FACTORS_BY_PGA_INCLINED,
+    FACTORS_BY_PGA_CASE3
 )
 from views.predimensioning import Predimensioning
 
@@ -65,7 +66,7 @@ def calculate_predimensioning(data):
     ]
 
 
-def get_factor(value, ranges, default=0):
+def get_factor(value: float, ranges: list, default: float = 0.0) -> float:
     """
     Obtiene el factor correspondiente a un valor según los rangos especificados.
     """
@@ -140,7 +141,7 @@ def calculate_design_logic(select_design, data):
         type_soil = validated_data["type_soil"]
 
         # Seleccionar el conjunto de factores según el ángulo
-        factors = FACTORS_BY_AA if angle_inclination == 0 else FACTORS_BY_AA_INCLINED
+        factors = FACTORS_BY_PGA if angle_inclination == 0 else FACTORS_BY_PGA_INCLINED
         # TODO: Necesitamos crear caso 3
 
         # Validar que Aa esté en los factores
@@ -595,7 +596,7 @@ def seismic_thrust(pga, angle_soil_wall, angle_friction, beta_rad, unit_weight, 
     return (pseis, mpseis)
 
 
-def live_load(ka=0, unit_weight=0, wall_height=0, angle_inclination=0, case3=False):
+def live_load(ka: float = 0.0, unit_weight=0, wall_height=0, angle_inclination=0, case3=False):
     print("""# 2.4.3 sobrecarga por carga viva (LS)""")
 
     heq = 0.6
