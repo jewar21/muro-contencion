@@ -11,33 +11,6 @@ from models.project_data import (
 from views.predimensioning import Predimensioning
 
 
-def calculate_design_logic(data):
-    """
-    Realiza los cálculos de diseño basados en los datos proporcionados.
-
-    :param data: Diccionario con los valores de entrada.
-    :return: Resultado del diseño.
-    """
-    try:
-        # Convertir los valores a numéricos donde sea necesario
-        angle_friction = float(data["angle_friction"])
-        angle_soil_wall = float(data["angle_soil_wall"])
-        unit_weight = float(data["unit_weight"])
-        steel_resistance = float(data["steel_resistance"])
-        wall_height = float(data["wall_height"])
-
-        return (
-            angle_friction,
-            angle_soil_wall,
-            unit_weight,
-            steel_resistance,
-            wall_height,
-        )
-
-    except ValueError as e:
-        return {"error": f"Entrada inválida: {e}"}
-
-
 def calculate_predimensioning(data):
     """
     Realiza los cálculos de predimensionamiento basados en las fórmulas del archivo.
@@ -140,9 +113,13 @@ def calculate_design_logic(select_design, data):
         diente = validated_data["diente"]
         type_soil = validated_data["type_soil"]
 
-        # Seleccionar el conjunto de factores según el ángulo
-        factors = FACTORS_BY_PGA if angle_inclination == 0 else FACTORS_BY_PGA_INCLINED
-        # TODO: Necesitamos crear caso 3
+        # Seleccionar el conjunto de factores según el diseño
+        if select_design == "Con inclinación":
+            factors = FACTORS_BY_PGA_INCLINED
+        elif select_design == "Sin inclinación - vías":
+            factors = FACTORS_BY_PGA
+        else:
+            factors = FACTORS_BY_PGA_CASE3
 
         # Validar que Aa esté en los factores
         if aa not in factors:
@@ -616,7 +593,7 @@ def live_load(ka: float = 0.0, unit_weight=0, wall_height=0, angle_inclination=0
         return (ls, mls)
 
 
-def barrier_collision(wall_height=0, f=0, angle_inclination=0, case3=False):
+def barrier_collision(wall_height: float = 0, f: float = 0, angle_inclination: float = 0, case3: bool = False) -> tuple[float, float]:
     print("""# 2.4.4 Fuerza de colisión CT sobre la barrera""")
     """# 2.4.4 Fuerza de colisión CT sobre la barrera"""
     fhb = 240
