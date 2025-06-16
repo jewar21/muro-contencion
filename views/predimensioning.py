@@ -3,6 +3,7 @@ import os
 import customtkinter as ctk
 from tkinter import messagebox
 from PIL import Image, ImageTk
+from customtkinter import CTkImage
 
 
 class Predimensioning(ctk.CTkToplevel):
@@ -112,7 +113,7 @@ class Predimensioning(ctk.CTkToplevel):
         ctk.CTkLabel(frame, text=title, font=ctk.CTkFont(
             size=14, weight="bold")).pack(pady=(10, 5))
 
-        columns = self.get_table_columns(key)
+        columns = self.get_table_columns(key) or []
         table = ctk.CTkFrame(frame, fg_color="#f3f3f3")
         table.pack(padx=5, pady=5, fill="x")
 
@@ -205,12 +206,12 @@ class Predimensioning(ctk.CTkToplevel):
             "Sin inclinación": "segunda_sin_inclinacion.png",
         }
         filename = image_map.get(design)
-        path = os.path.join("assets", "images", filename)
+        if filename: path = os.path.join("assets", "images", filename)
         if os.path.exists(path):
-            img = Image.open(path).resize((360, 360), Image.LANCZOS)
-            photo = ImageTk.PhotoImage(img)
-            self.image_label.configure(image=photo)
-            self.image_label.image = photo
+            pil_image = Image.open(path)
+            ctk_image = CTkImage(light_image=pil_image, size=(360, 360))
+            self.image_label.configure(image=ctk_image, text="")
+            self.image_label._image = ctk_image  # Mantener la referencia
         else:
             self.image_label.configure(text="Imagen no encontrada")
 
