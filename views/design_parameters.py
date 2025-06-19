@@ -181,7 +181,7 @@ class DesignParameters(ctk.CTk):
             "Sin inclinación": "primera_sin_inclinacion.png",
         }
         filename = image_map.get(design_type)
-        path = os.path.join("assets", "images", filename)
+        if filename : path = os.path.join("assets", "images", filename)
         if os.path.exists(path):
             img = Image.open(path).resize((360, 360), Image.LANCZOS)
             photo = ImageTk.PhotoImage(img)

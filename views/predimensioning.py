@@ -1,9 +1,11 @@
 
 import os
 import customtkinter as ctk
-from tkinter import messagebox
+from tkinter import messagebox, filedialog
 from PIL import Image, ImageTk
 from customtkinter import CTkImage
+
+from utils.pdf_generator import build_complete_pdf
 
 
 class Predimensioning(ctk.CTkToplevel):
@@ -206,7 +208,8 @@ class Predimensioning(ctk.CTkToplevel):
             "Sin inclinación": "segunda_sin_inclinacion.png",
         }
         filename = image_map.get(design)
-        if filename: path = os.path.join("assets", "images", filename)
+        if filename:
+            path = os.path.join("assets", "images", filename)
         if os.path.exists(path):
             pil_image = Image.open(path)
             ctk_image = CTkImage(light_image=pil_image, size=(360, 360))
@@ -216,51 +219,56 @@ class Predimensioning(ctk.CTkToplevel):
             self.image_label.configure(text="Imagen no encontrada")
 
     def export_to_pdf(self):
-        from reportlab.lib.pagesizes import letter
-        from reportlab.pdfgen import canvas
+        # output_path = "predimensionamiento_resultado.pdf"
+        output_path = filedialog.asksaveasfilename(
+            defaultextension=".pdf",
+            filetypes=[("PDF files", "*.pdf")],
+            title="Guardar como"
+        )
 
-        pdf_path = "predimensionamiento_resultado.pdf"
-        c = canvas.Canvas(pdf_path, pagesize=letter)
-        width, height = letter
+        print("INFORMACION PDF", self.input_data)
 
-        c.setFont("Helvetica-Bold", 16)
-        c.drawString(72, height - 72, "Resultados de Predimensionamiento")
+        predim_data = {
+            "notas": [
+                "Se recomienda instalar drenajes de 3” con separación máxima de 3 m en ambas direcciones, junto con un sistema de filtración para evitar el incremento de presiones hidrostáticas.",
+                "Si existen estudios de microzonificación o de sitio, se debe verificar la aceleración pico-efectiva en la roca (PGA) para garantizar el cumplimiento de los parámetros sísmicos.",
+                "Este diseño no considera la influencia del nivel freático; en caso de ser relevante, se recomienda su evaluación para determinar su impacto en la estabilidad del muro.",
+                "El análisis de estabilidad realizado es local; se deben desarrollar estudios específicos para identificar superficies de falla que puedan comprometer la estabilidad global del muro.",
+                "Se recomienda el uso de suelos grava-arenosos SW, SP y GP, con compactación adecuada y un contenido de finos inferior al 5% para garantizar su estabilidad.",
+                "Es fundamental realizar controles de densidad en campo para verificar el cumplimiento de los niveles de compactación requeridos."
+            ],
+            "parametros": [
+                ("Altura del muro (m)", f'{self.input_data.get(
+                    "h", "N/A"): .2f} m'),
+                ("Aceleración pico-efectiva en la roca (PGA)", "0,40"),
+                ("Capacidad portante del suelo de cimentación (qN)",
+                 f'{self.input_data.get("capacidad_portante_r1", "N/A")} kN/m²'),
+                ("Inclinación de terreno (i)", "20°"),
+                ("Ángulo fricción interna (ϕ)", "38°"),
+                ("Peso específico del relleno (γrelleno)", "1,8 Ton/m³"),
+                ("Resistencia del concreto (f′c)", "24,5 MPa"),
+                ("Resistencia del acero (fy)",
+                 f'{self.input_data.get("Resistencia del acero (fy)", "N/A")} MPa'),
+                ("Ángulo de fricción suelo-muro (δ)", "12°")
+            ],
 
-        y = height - 100
-        c.setFont("Helvetica-Bold", 12)
-        c.drawString(72, y, "Datos de Predimensionamiento:")
-        y -= 20
+        }
 
-        c.setFont("Helvetica", 10)
-        for key, entry in self.predim_entries.items():
-            value = entry.get()
-            c.drawString(80, y, f"{key}: {value}")
-            y -= 14
-            if y < 72:
-                c.showPage()
-                y = height - 72
+        logos = {
+            "logo_civil": "assets/images/pdf/logoCivil.png",
+            "logo_ufpso": "assets/images/pdf/Logoufpso.png"
+        }
 
-        for section, rows in self.verification_results.items():
-            y -= 20
-            if y < 100:
-                c.showPage()
-                y = height - 72
-
-            c.setFont("Helvetica-Bold", 12)
-            c.drawString(72, y, f"Verificación - {section.upper()}")
-            y -= 20
-
-            c.setFont("Helvetica", 10)
-            for row in rows:
-                c.drawString(80, y, " | ".join([str(col) for col in row]))
-                y -= 14
-                if y < 72:
-                    c.showPage()
-                    y = height - 72
-
-        c.save()
-        messagebox.showinfo("Exportación Exitosa",
-                            f"PDF guardado como {pdf_path}")
+        image_path = "assets/images/pdf/Diseno_para_barrera.png"
+        
+        if output_path:
+            try:
+                build_complete_pdf(output_path, predim_data,
+                           self.verification_results, image_path, logos)
+                messagebox.showinfo("Exportación Exitosa",
+                            f"PDF guardado como {output_path}")
+            except Exception as e:
+                messagebox.showinfo("No se pudo exportar PDF")
 
     def enable_editing(self):
         for entry in self.predim_entries.values():
